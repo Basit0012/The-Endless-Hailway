@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3bf1b391f27e7ec49bf174035d666032, type: 3}
+  m_Name: Loop_05_DeepWrongness
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessHallway.Anomaly.LoopConfigSO
+  loopIndex: 5
+  loopTitle: Loop 5 - Deep Wrongness
+  narrativeNote: 
+  ambientOverlayClip: {fileID: 8300000, guid: 0e76635a0b0dc7b48a54ca8e7df54e94, type: 3}
+  ambientOverlayVolume: 0.55
+  activeAnomalies:
+  - {fileID: 11400000, guid: 2adfd5d31ebd1e9409580cd70de15cb7, type: 2}
+  - {fileID: 11400000, guid: 1624e02de222ffa43987fb114b6d9ed4, type: 2}
+  - {fileID: 11400000, guid: 827792574bc27104c998cfa4369bd30a, type: 2}
+  - {fileID: 11400000, guid: df2900e9d48f92b48a98937ad0a394d3, type: 2}

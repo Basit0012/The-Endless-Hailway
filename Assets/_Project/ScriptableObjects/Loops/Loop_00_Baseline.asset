@@ -16,6 +16,6 @@ MonoBehaviour:
   loopTitle: Loop 0 - Baseline
   narrativeNote: Normal apartment hallway. Room 214 door closed but unlocked. Fire
     drill notice on board.
-  ambientOverlayClip: {fileID: 0}
-  ambientOverlayVolume: 0.5
+  ambientOverlayClip: {fileID: 8300000, guid: 0e76635a0b0dc7b48a54ca8e7df54e94, type: 3}
+  ambientOverlayVolume: 0.35
   activeAnomalies: []

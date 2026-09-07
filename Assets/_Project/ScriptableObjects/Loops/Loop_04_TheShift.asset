@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3bf1b391f27e7ec49bf174035d666032, type: 3}
+  m_Name: Loop_04_TheShift
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessHallway.Anomaly.LoopConfigSO
+  loopIndex: 4
+  loopTitle: Loop 4 - The Shift
+  narrativeNote: 
+  ambientOverlayClip: {fileID: 8300000, guid: 0e76635a0b0dc7b48a54ca8e7df54e94, type: 3}
+  ambientOverlayVolume: 0.5
+  activeAnomalies:
+  - {fileID: 11400000, guid: 2adfd5d31ebd1e9409580cd70de15cb7, type: 2}
+  - {fileID: 11400000, guid: 2707aef5b27778c438d6e1409b23fd9f, type: 2}
+  - {fileID: 11400000, guid: 0855638dac6dce540b3a717378bb0713, type: 2}

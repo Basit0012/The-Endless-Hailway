@@ -15,7 +15,7 @@ MonoBehaviour:
   loopIndex: 1
   loopTitle: Loop 1 - The First Wrongness
   narrativeNote: Welcome mat outside Room 214 is askew.
-  ambientOverlayClip: {fileID: 0}
-  ambientOverlayVolume: 0.5
+  ambientOverlayClip: {fileID: 8300000, guid: 0e76635a0b0dc7b48a54ca8e7df54e94, type: 3}
+  ambientOverlayVolume: 0.35
   activeAnomalies:
-  - {fileID: 11400000, guid: 6187f913a6c83d048a1a2580e0102291, type: 2}
+  - {fileID: 11400000, guid: 3ea9dfd5bb24db047957b4da3ba280ca, type: 2}

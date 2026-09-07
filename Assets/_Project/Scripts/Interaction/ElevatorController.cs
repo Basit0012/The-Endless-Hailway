@@ -98,6 +98,21 @@ namespace EndlessHallway.Interaction
             // 1. Close doors
             yield return StartCoroutine(AnimateDoors(false));
 
+            // Check if final loop choice made (Erosion Ending: player returned to elevator)
+            if (LoopManager.Instance != null && LoopManager.Instance.CurrentLoop >= 7)
+            {
+                if (Entity.ObserverController.Instance != null)
+                {
+                    Entity.ObserverController.Instance.TriggerFinalChoice(false);
+                }
+                else if (GameManager.Instance != null)
+                {
+                    GameManager.Instance.TriggerEnding(false);
+                }
+                isTransitioning = false;
+                yield break;
+            }
+
             // 2. Play hum / ride sound
             if (elevatorRideHumClip != null && OneShotPool.Instance != null)
             {

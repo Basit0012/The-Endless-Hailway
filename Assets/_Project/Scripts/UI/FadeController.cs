@@ -34,6 +34,15 @@ namespace EndlessHallway.UI
             }
         }
 
+        public void SetColor(Color color)
+        {
+            var img = GetComponent<UnityEngine.UI.Image>();
+            if (img != null)
+            {
+                img.color = color;
+            }
+        }
+
         public IEnumerator FadeOutRoutine(float duration = 1.0f)
         {
             float elapsed = 0f;

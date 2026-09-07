@@ -61,6 +61,10 @@ namespace EndlessHallway.Interaction
             {
                 WorldStateResetter.Instance.Register(this);
             }
+            if (Anomaly.AnomalyManager.Instance != null)
+            {
+                Anomaly.AnomalyManager.Instance.RegisterDoor(this);
+            }
         }
 
         private void OnDestroy()
@@ -68,6 +72,10 @@ namespace EndlessHallway.Interaction
             if (WorldStateResetter.Instance != null)
             {
                 WorldStateResetter.Instance.Unregister(this);
+            }
+            if (Anomaly.AnomalyManager.Instance != null)
+            {
+                Anomaly.AnomalyManager.Instance.UnregisterDoor(this);
             }
         }
 

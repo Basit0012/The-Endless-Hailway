@@ -132,6 +132,9 @@ namespace EndlessHallway.Entity
 
         private void CheckPlayerGazeAndDistance()
         {
+            if (currentState == ObserverState.Hidden || currentState == ObserverState.Present) return;
+            if (playerCamera == null) return;
+
             Vector3 toObserver = (transform.position + Vector3.up * 1f) - playerCamera.transform.position;
             float distance = toObserver.magnitude;
 

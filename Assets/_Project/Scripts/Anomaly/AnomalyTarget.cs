@@ -23,11 +23,19 @@ namespace EndlessHallway.Anomaly
         private Color baselineLightColor;
         private float baselineLightIntensity;
         private AudioSource cachedAudioSource;
-
         private Coroutine flickerCoroutine;
+        private bool isBaselineInitialized = false;
 
         private void Awake()
         {
+            InitializeBaseline();
+        }
+
+        public void InitializeBaseline()
+        {
+            if (isBaselineInitialized) return;
+            isBaselineInitialized = true;
+
             // Cache baseline transforms
             baselinePosition = transform.localPosition;
             baselineRotation = transform.localRotation;

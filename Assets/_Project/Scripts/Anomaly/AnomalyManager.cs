@@ -15,6 +15,10 @@ namespace EndlessHallway.Anomaly
         [Header("Configurations")]
         [SerializeField] private List<LoopConfigSO> loopConfigs = new List<LoopConfigSO>();
 
+        [Header("Volume Management")]
+        [SerializeField] private UnityEngine.Rendering.Volume sceneVolume;
+        [SerializeField] private UnityEngine.Rendering.VolumeProfile baselineVolumeProfile;
+
         private readonly Dictionary<string, AnomalyTarget> targetRegistry = new Dictionary<string, AnomalyTarget>();
         private readonly Dictionary<string, DoorController> doorRegistry = new Dictionary<string, DoorController>();
 
@@ -26,6 +30,35 @@ namespace EndlessHallway.Anomaly
                 return;
             }
             Instance = this;
+
+            if (sceneVolume == null)
+            {
+                sceneVolume = FindAnyObjectByType<UnityEngine.Rendering.Volume>();
+            }
+            if (sceneVolume != null && baselineVolumeProfile == null)
+            {
+                baselineVolumeProfile = sceneVolume.sharedProfile;
+            }
+
+            // Discover and register all targets and doors in the scene (including currently inactive ones)
+            AnomalyTarget[] targets = FindObjectsByType<AnomalyTarget>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+            foreach (var t in targets)
+            {
+                if (t != null)
+                {
+                    t.InitializeBaseline();
+                    RegisterTarget(t);
+                }
+            }
+
+            DoorController[] doors = FindObjectsByType<DoorController>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+            foreach (var d in doors)
+            {
+                if (d != null)
+                {
+                    RegisterDoor(d);
+                }
+            }
         }
 
         public void RegisterTarget(AnomalyTarget target)
@@ -60,6 +93,14 @@ namespace EndlessHallway.Anomaly
             }
         }
 
+        public void SetSceneVolumeProfile(UnityEngine.Rendering.VolumeProfile profile)
+        {
+            if (sceneVolume != null && profile != null)
+            {
+                sceneVolume.profile = profile;
+            }
+        }
+
         /// <summary>
         /// Resets the hallway to baseline, then applies anomalies configured for the specified loop.
         /// </summary>
@@ -72,6 +113,27 @@ namespace EndlessHallway.Anomaly
                 {
                     target.ResetToBaseline();
                 }
+            }
+
+            // Reset all registered doors to baseline
+            foreach (var door in doorRegistry.Values)
+            {
+                if (door != null)
+                {
+                    door.ResetToDefaultState();
+                }
+            }
+
+            // Reset Volume to baseline
+            if (sceneVolume != null && baselineVolumeProfile != null)
+            {
+                sceneVolume.profile = baselineVolumeProfile;
+            }
+
+            // Reset Observer to hidden
+            if (Entity.ObserverController.Instance != null)
+            {
+                Entity.ObserverController.Instance.ResetToDefaultState();
             }
 
             // 2. Locate configuration for this loop
@@ -89,7 +151,21 @@ namespace EndlessHallway.Anomaly
             {
                 if (anomaly == null) continue;
 
-                if (anomaly.anomalyType == AnomalyType.DoorLockState)
+                if (anomaly.anomalyType == AnomalyType.LightingChange)
+                {
+                    if (sceneVolume != null && anomaly.volumeProfile != null)
+                    {
+                        sceneVolume.profile = anomaly.volumeProfile;
+                    }
+                }
+                else if (anomaly.anomalyType == AnomalyType.ObserverSpawn)
+                {
+                    if (Entity.ObserverController.Instance != null)
+                    {
+                        Entity.ObserverController.Instance.SpawnAtPoint(anomaly.observerSpawnPointId, anomaly.observerState);
+                    }
+                }
+                else if (anomaly.anomalyType == AnomalyType.DoorLockState)
                 {
                     // Check door registry or find in scene
                     if (doorRegistry.TryGetValue(anomaly.targetObjectId, out DoorController door))

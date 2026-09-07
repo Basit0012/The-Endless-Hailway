@@ -4,12 +4,14 @@ namespace EndlessHallway.Anomaly
 {
     public enum AnomalyType
     {
-        TransformShift,
-        SetActiveState,
-        MaterialSwap,
-        LightFlicker,
-        DoorLockState,
-        AudioTrigger
+        TransformShift = 0,
+        SetActiveState = 1,
+        MaterialSwap = 2,
+        LightFlicker = 3,
+        DoorLockState = 4,
+        AudioTrigger = 5,
+        LightingChange = 6,
+        ObserverSpawn = 7
     }
 
     /// <summary>
@@ -54,5 +56,12 @@ namespace EndlessHallway.Anomaly
         public AudioClip audioClip;
         public bool loopAudio = false;
         [Range(0f, 1f)] public float audioVolume = 1f;
+
+        [Header("Volume Profile (LightingChange)")]
+        public UnityEngine.Rendering.VolumeProfile volumeProfile;
+
+        [Header("Observer Spawn")]
+        public string observerSpawnPointId = "FarHallway";
+        public EndlessHallway.Entity.ObserverState observerState = EndlessHallway.Entity.ObserverState.GlimpseFar;
     }
 }
