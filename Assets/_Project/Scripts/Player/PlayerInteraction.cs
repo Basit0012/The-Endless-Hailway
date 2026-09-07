@@ -24,9 +24,14 @@ namespace EndlessHallway.Player
             set
             {
                 canInteract = value;
-                if (!canInteract && PromptUI.Instance != null)
+                if (InteractionManager.Instance != null)
                 {
-                    PromptUI.Instance.HidePrompt();
+                    InteractionManager.Instance.IsInteractionEnabled = value;
+                }
+                if (!canInteract)
+                {
+                    if (PromptUI.Instance != null) PromptUI.Instance.HidePrompt();
+                    if (InteractionPrompt.Instance != null) InteractionPrompt.Instance.Hide();
                 }
             }
         }
@@ -46,6 +51,12 @@ namespace EndlessHallway.Player
 
         private void Update()
         {
+            // If centralized InteractionManager is active, it handles raycasting and input
+            if (InteractionManager.Instance != null && InteractionManager.Instance.enabled)
+            {
+                return;
+            }
+
             if (!canInteract) return;
 
             PerformInteractionRaycast();
