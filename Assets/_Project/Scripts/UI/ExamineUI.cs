@@ -1,0 +1,139 @@
+using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
+using EndlessHallway.Player;
+using EndlessHallway.Interaction;
+using EndlessHallway.Core;
+#if ENABLE_INPUT_SYSTEM
+using UnityEngine.InputSystem;
+#endif
+
+namespace EndlessHallway.UI
+{
+    public class ExamineUI : MonoBehaviour
+    {
+        public static ExamineUI Instance { get; private set; }
+
+        [Header("UI Panels")]
+        [SerializeField] private GameObject panelRoot;
+        [SerializeField] private TextMeshProUGUI titleText;
+        [SerializeField] private TextMeshProUGUI bodyText;
+        [SerializeField] private Image clueImage;
+        [SerializeField] private GameObject warmEffectIndicator;
+        [SerializeField] private Button closeButton;
+
+        private PlayerInteraction activePlayer;
+        private PlayerController activePlayerController;
+        private PlayerCameraLook activePlayerLook;
+        private bool isOpen = false;
+
+        public bool IsOpen => isOpen;
+
+        private void Awake()
+        {
+            if (Instance != null && Instance != this)
+            {
+                Destroy(gameObject);
+                return;
+            }
+            Instance = this;
+
+            if (panelRoot != null) panelRoot.SetActive(false);
+            if (closeButton != null) closeButton.onClick.AddListener(Close);
+        }
+
+        private void Update()
+        {
+            if (!isOpen) return;
+
+            bool closePressed = false;
+
+#if ENABLE_INPUT_SYSTEM
+            if (Keyboard.current != null && (Keyboard.current.escapeKey.wasPressedThisFrame || Keyboard.current.eKey.wasPressedThisFrame))
+            {
+                closePressed = true;
+            }
+#endif
+
+            if (closePressed)
+            {
+                Close();
+            }
+        }
+
+        public void Show(Examinable examinable, PlayerInteraction player)
+        {
+            if (examinable == null) return;
+
+            isOpen = true;
+            activePlayer = player;
+
+            if (player != null)
+            {
+                activePlayerController = player.GetComponent<PlayerController>();
+                activePlayerLook = player.GetComponent<PlayerCameraLook>();
+
+                if (activePlayerController != null) activePlayerController.CanMove = false;
+                if (activePlayerLook != null)
+                {
+                    activePlayerLook.CanLook = false;
+                    activePlayerLook.UnlockCursor();
+                }
+                player.CanInteract = false;
+            }
+
+            if (GameManager.Instance != null)
+            {
+                GameManager.Instance.SetState(GameState.Examining);
+            }
+
+            if (titleText != null) titleText.text = examinable.Title;
+            if (bodyText != null) bodyText.text = examinable.DocumentText;
+
+            if (clueImage != null)
+            {
+                if (examinable.DocumentSprite != null)
+                {
+                    clueImage.gameObject.SetActive(true);
+                    clueImage.sprite = examinable.DocumentSprite;
+                }
+                else
+                {
+                    clueImage.gameObject.SetActive(false);
+                }
+            }
+
+            if (warmEffectIndicator != null)
+            {
+                warmEffectIndicator.SetActive(examinable.IsWarmToTouch);
+            }
+
+            if (panelRoot != null) panelRoot.SetActive(true);
+            if (PromptUI.Instance != null) PromptUI.Instance.HidePrompt();
+        }
+
+        public void Close()
+        {
+            if (!isOpen) return;
+
+            isOpen = false;
+            if (panelRoot != null) panelRoot.SetActive(false);
+
+            if (activePlayer != null)
+            {
+                if (activePlayerController != null) activePlayerController.CanMove = true;
+                if (activePlayerLook != null)
+                {
+                    activePlayerLook.CanLook = true;
+                    activePlayerLook.LockCursor();
+                }
+                activePlayer.CanInteract = true;
+            }
+
+            if (GameManager.Instance != null)
+            {
+                GameManager.Instance.SetState(GameState.Exploring);
+            }
+        }
+    }
+}

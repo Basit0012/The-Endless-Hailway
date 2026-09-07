@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3bf1b391f27e7ec49bf174035d666032, type: 3}
+  m_Name: Loop_02_DoorAndLight
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessHallway.Anomaly.LoopConfigSO
+  loopIndex: 2
+  loopTitle: Loop 2 - The Door and the Light
+  narrativeNote: Light above Room 214 flickers; Room 214 door is locked.
+  ambientOverlayClip: {fileID: 0}
+  ambientOverlayVolume: 0.5
+  activeAnomalies:
+  - {fileID: 11400000, guid: 8396b239f73f6f449955e99da4b4100e, type: 2}
+  - {fileID: 11400000, guid: cc5224a790fd84d45bff8d9132568f1b, type: 2}
