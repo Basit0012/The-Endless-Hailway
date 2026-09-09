@@ -79,15 +79,22 @@ namespace EndlessHallway.UI
             if (gameOverPanel == null) return;
             gameOverPanel.SetActive(true);
 
-            // Freeze player
-            var pCtrl = FindAnyObjectByType<Player.PlayerController>();
-            var pLook = FindAnyObjectByType<Player.PlayerCameraLook>();
-            if (pCtrl != null) pCtrl.CanMove = false;
-            if (pLook != null) pLook.CanLook = false;
+            if (GameManager.Instance != null)
+            {
+                GameManager.Instance.SetState(GameState.GameOver);
+            }
+            else
+            {
+                // Freeze player
+                var pCtrl = FindAnyObjectByType<Player.PlayerController>();
+                var pLook = FindAnyObjectByType<Player.PlayerCameraLook>();
+                if (pCtrl != null) pCtrl.CanMove = false;
+                if (pLook != null) pLook.CanLook = false;
 
-            // Cursor setup
-            Cursor.lockState = CursorLockMode.None;
-            Cursor.visible = true;
+                // Cursor setup
+                Cursor.lockState = CursorLockMode.None;
+                Cursor.visible = true;
+            }
 
             if (fadeCoroutine != null) StopCoroutine(fadeCoroutine);
             fadeCoroutine = StartCoroutine(FadeInRoutine(1.2f));
@@ -171,14 +178,21 @@ namespace EndlessHallway.UI
                 LoopManager.Instance.ResetLoop(targetLoop);
             }
 
-            // Restore controls
-            var pCtrl = FindAnyObjectByType<Player.PlayerController>();
-            var pLook = FindAnyObjectByType<Player.PlayerCameraLook>();
-            if (pCtrl != null) pCtrl.CanMove = true;
-            if (pLook != null) pLook.CanLook = true;
+            if (GameManager.Instance != null)
+            {
+                GameManager.Instance.SetState(GameState.Exploring);
+            }
+            else
+            {
+                // Restore controls
+                var pCtrl = FindAnyObjectByType<Player.PlayerController>();
+                var pLook = FindAnyObjectByType<Player.PlayerCameraLook>();
+                if (pCtrl != null) pCtrl.CanMove = true;
+                if (pLook != null) pLook.CanLook = true;
 
-            Cursor.lockState = CursorLockMode.Locked;
-            Cursor.visible = false;
+                Cursor.lockState = CursorLockMode.Locked;
+                Cursor.visible = false;
+            }
         }
 
         public void OnExitClicked()
