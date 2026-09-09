@@ -134,8 +134,15 @@ namespace EndlessHallway.UI
             if (creditsPanel != null) creditsPanel.SetActive(false);
             if (hudLayer != null) hudLayer.SetActive(false);
 
-            SetCursorState(true);
-            SetPlayerControls(false);
+            if (GameManager.Instance != null)
+            {
+                GameManager.Instance.SetState(GameState.MainMenu);
+            }
+            else
+            {
+                SetCursorState(true);
+                SetPlayerControls(false);
+            }
             Time.timeScale = 1f;
         }
 
@@ -149,8 +156,15 @@ namespace EndlessHallway.UI
             if (mainMenuUI != null) mainMenuUI.HideMenu();
             if (hudLayer != null) hudLayer.SetActive(true);
 
-            SetCursorState(false);
-            SetPlayerControls(true);
+            if (GameManager.Instance != null)
+            {
+                GameManager.Instance.SetState(GameState.Exploring);
+            }
+            else
+            {
+                SetCursorState(false);
+                SetPlayerControls(true);
+            }
             Time.timeScale = 1f;
         }
 
@@ -162,15 +176,39 @@ namespace EndlessHallway.UI
             }
         }
 
+        private void OnApplicationFocus(bool hasFocus)
+        {
+            if (!hasFocus) return;
+
+            if (currentScreen != UIScreen.None)
+            {
+                SetCursorState(true);
+                SetPlayerControls(false);
+            }
+            else if (GameManager.Instance != null && GameManager.Instance.CurrentState == GameState.Exploring)
+            {
+                SetCursorState(false);
+                SetPlayerControls(true);
+            }
+        }
+
         private void HandlePauseToggled(bool isPaused)
         {
             if (isPaused && currentScreen == UIScreen.None)
             {
                 currentScreen = UIScreen.PauseMenu;
+                if (GameManager.Instance != null)
+                {
+                    GameManager.Instance.SetState(GameState.Paused);
+                }
             }
             else if (!isPaused && currentScreen == UIScreen.PauseMenu)
             {
                 currentScreen = UIScreen.None;
+                if (GameManager.Instance != null)
+                {
+                    GameManager.Instance.SetState(GameState.Exploring);
+                }
             }
         }
 
@@ -205,8 +243,15 @@ namespace EndlessHallway.UI
             if (creditsPanel != null) creditsPanel.SetActive(false);
 
             Time.timeScale = 0f;
-            SetCursorState(true);
-            SetPlayerControls(false);
+            if (GameManager.Instance != null)
+            {
+                GameManager.Instance.SetState(GameState.Paused);
+            }
+            else
+            {
+                SetCursorState(true);
+                SetPlayerControls(false);
+            }
         }
 
         public void ResumeFromPause()
@@ -228,8 +273,15 @@ namespace EndlessHallway.UI
             if (settingsUI != null) settingsUI.Close();
 
             Time.timeScale = 1f;
-            SetCursorState(false);
-            SetPlayerControls(true);
+            if (GameManager.Instance != null)
+            {
+                GameManager.Instance.SetState(GameState.Exploring);
+            }
+            else
+            {
+                SetCursorState(false);
+                SetPlayerControls(true);
+            }
         }
 
         public void ShowGameOver(Action onRetry = null, Action onExit = null)
@@ -244,8 +296,15 @@ namespace EndlessHallway.UI
                 gameOverUI.ShowGameOver(onRetry, onExit);
             }
 
-            SetCursorState(true);
-            SetPlayerControls(false);
+            if (GameManager.Instance != null)
+            {
+                GameManager.Instance.SetState(GameState.GameOver);
+            }
+            else
+            {
+                SetCursorState(true);
+                SetPlayerControls(false);
+            }
         }
 
         public void HideGameOver()
@@ -260,8 +319,15 @@ namespace EndlessHallway.UI
                 gameOverUI.HideGameOver();
             }
 
-            SetCursorState(false);
-            SetPlayerControls(true);
+            if (GameManager.Instance != null)
+            {
+                GameManager.Instance.SetState(GameState.Exploring);
+            }
+            else
+            {
+                SetCursorState(false);
+                SetPlayerControls(true);
+            }
         }
 
         public void OpenSettings(Action onClosed = null)
@@ -274,6 +340,15 @@ namespace EndlessHallway.UI
             {
                 settingsUI.Open(OnSettingsClosedInternal);
             }
+
+            if (GameManager.Instance != null)
+            {
+                GameManager.Instance.SetState(GameState.Settings);
+            }
+            else
+            {
+                SetCursorState(true);
+            }
         }
 
         private void OnSettingsClosedInternal()
@@ -281,6 +356,17 @@ namespace EndlessHallway.UI
             currentScreen = previousScreen;
             settingsCloseCallback?.Invoke();
             settingsCloseCallback = null;
+
+            if (GameManager.Instance != null)
+            {
+                if (currentScreen == UIScreen.MainMenu) GameManager.Instance.SetState(GameState.MainMenu);
+                else if (currentScreen == UIScreen.PauseMenu) GameManager.Instance.SetState(GameState.Paused);
+                else GameManager.Instance.SetState(GameState.Exploring);
+            }
+            else
+            {
+                SetCursorState(currentScreen != UIScreen.None);
+            }
         }
 
         public void CloseSettings()
