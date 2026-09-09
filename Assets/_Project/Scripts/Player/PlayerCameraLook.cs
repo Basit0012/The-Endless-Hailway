@@ -62,7 +62,51 @@ namespace EndlessHallway.Player
                 ApplySettings();
             }
 
-            LockCursor();
+            // Sync with GameManager state rather than blindly locking
+            if (Core.GameManager.Instance != null)
+            {
+                if (Core.GameManager.Instance.CurrentState == Core.GameState.Exploring)
+                {
+                    LockCursor();
+                    canLook = true;
+                }
+                else
+                {
+                    UnlockCursor();
+                    canLook = false;
+                }
+            }
+            else
+            {
+                var mainMenu = FindAnyObjectByType<UI.MainMenuUI>(FindObjectsInactive.Include);
+                if (mainMenu != null && mainMenu.gameObject.activeInHierarchy)
+                {
+                    UnlockCursor();
+                    canLook = false;
+                }
+                else
+                {
+                    LockCursor();
+                    canLook = true;
+                }
+            }
+        }
+
+        private void OnApplicationFocus(bool hasFocus)
+        {
+            if (!hasFocus) return;
+
+            if (Core.GameManager.Instance != null)
+            {
+                if (Core.GameManager.Instance.CurrentState == Core.GameState.Exploring)
+                {
+                    LockCursor();
+                }
+                else
+                {
+                    UnlockCursor();
+                }
+            }
         }
 
         private void OnDestroy()
