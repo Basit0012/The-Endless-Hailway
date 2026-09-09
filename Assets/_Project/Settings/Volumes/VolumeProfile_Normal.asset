@@ -16,6 +16,9 @@ MonoBehaviour:
   - {fileID: 11400001}
   - {fileID: 11400002}
   - {fileID: 11400003}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
 --- !u!114 &11400001
 MonoBehaviour:
   m_ObjectHideFlags: 3
@@ -31,7 +34,7 @@ MonoBehaviour:
   active: 1
   intensity:
     m_OverrideState: 1
-    m_Value: -0.22
+    m_Value: -0.08
   xMultiplier:
     m_OverrideState: 1
     m_Value: 1
@@ -65,10 +68,10 @@ MonoBehaviour:
     m_Value: {x: 0.5, y: 0.5}
   intensity:
     m_OverrideState: 1
-    m_Value: 0.28
+    m_Value: 0.35
   smoothness:
     m_OverrideState: 1
-    m_Value: 0.45
+    m_Value: 0.4
   rounded:
     m_OverrideState: 1
     m_Value: 0
@@ -90,10 +93,10 @@ MonoBehaviour:
     m_Value: 0
   contrast:
     m_OverrideState: 1
-    m_Value: 16
+    m_Value: 14
   colorFilter:
     m_OverrideState: 1
-    m_Value: {r: 0.98, g: 0.96, b: 0.88, a: 1}
+    m_Value: {r: 0.97, g: 0.96, b: 0.9, a: 1}
   hueShift:
     m_OverrideState: 1
     m_Value: 0
