@@ -105,3 +105,32 @@ InitTestScene*.unity*
 
 # Auto-generated scenes by play mode tests
 /[Aa]ssets/[Ii]nit[Tt]est[Ss]cene*.unity*
+
+# ==========================================
+# Additional IDE & Modern Solution Files
+# ==========================================
+*.slnx
+*.sln.DotSettings.user
+.idea/
+
+# Visual Studio Code workspace settings (keep team config, ignore personal workspace state)
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# ==========================================
+# OS & System Artifacts
+# ==========================================
+.DS_Store
+.DS_Store?
+._*
+[Tt]humbs.db
+ehthumbs.db
+[Dd]esktop.ini
+
+# Environment & local secrets
+.env
+.env.*
+*.local
