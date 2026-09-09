@@ -42,6 +42,11 @@ namespace EndlessHallway.Core
             currentLoop++;
             Debug.Log($"[LoopManager] Advancing to Loop {currentLoop}");
 
+            if (SaveManager.Instance != null)
+            {
+                SaveManager.Instance.SaveCheckpoint(currentLoop);
+            }
+
             ApplyCurrentLoopState();
         }
 
