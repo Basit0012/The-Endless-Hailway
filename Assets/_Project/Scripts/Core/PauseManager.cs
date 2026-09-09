@@ -147,27 +147,34 @@ namespace EndlessHallway.Core
                 FindPlayerReferences();
             }
 
-            if (cachedPlayerController != null)
+            if (GameManager.Instance != null)
             {
-                cachedPlayerController.CanMove = !isPaused;
-            }
-
-            if (cachedPlayerCameraLook != null)
-            {
-                cachedPlayerCameraLook.CanLook = !isPaused;
-                if (isPaused)
-                {
-                    cachedPlayerCameraLook.UnlockCursor();
-                }
-                else
-                {
-                    cachedPlayerCameraLook.LockCursor();
-                }
+                GameManager.Instance.SetState(isPaused ? GameState.Paused : GameState.Exploring);
             }
             else
             {
-                Cursor.lockState = isPaused ? CursorLockMode.None : CursorLockMode.Locked;
-                Cursor.visible = isPaused;
+                if (cachedPlayerController != null)
+                {
+                    cachedPlayerController.CanMove = !isPaused;
+                }
+
+                if (cachedPlayerCameraLook != null)
+                {
+                    cachedPlayerCameraLook.CanLook = !isPaused;
+                    if (isPaused)
+                    {
+                        cachedPlayerCameraLook.UnlockCursor();
+                    }
+                    else
+                    {
+                        cachedPlayerCameraLook.LockCursor();
+                    }
+                }
+                else
+                {
+                    Cursor.lockState = isPaused ? CursorLockMode.None : CursorLockMode.Locked;
+                    Cursor.visible = isPaused;
+                }
             }
 
             if (cachedPlayerInteraction != null)
