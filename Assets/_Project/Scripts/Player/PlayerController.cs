@@ -50,6 +50,11 @@ namespace EndlessHallway.Player
             {
                 defaultCameraLocalPos = cameraHolder.localPosition;
             }
+
+            if (GetComponent<PlayerStressSystem>() == null)
+            {
+                gameObject.AddComponent<PlayerStressSystem>();
+            }
         }
 
         private void Update()
@@ -98,11 +103,18 @@ namespace EndlessHallway.Player
         {
             if (!enableHeadBob || cameraHolder == null) return;
 
+            float shakeScale = Core.SettingsManager.Instance != null ? Core.SettingsManager.Instance.CameraShake : 1.0f;
+            if (shakeScale <= 0.001f)
+            {
+                cameraHolder.localPosition = Vector3.Lerp(cameraHolder.localPosition, defaultCameraLocalPos, Time.deltaTime * 6f);
+                return;
+            }
+
             if (moveInput.sqrMagnitude > 0.01f && characterController.isGrounded)
             {
                 bobTimer += Time.deltaTime * (bobFrequency * (walkSpeed / 2.5f));
-                float hOffset = Mathf.Cos(bobTimer) * bobHorizontalAmplitude;
-                float vOffset = Mathf.Abs(Mathf.Sin(bobTimer)) * bobVerticalAmplitude;
+                float hOffset = Mathf.Cos(bobTimer) * bobHorizontalAmplitude * shakeScale;
+                float vOffset = Mathf.Abs(Mathf.Sin(bobTimer)) * bobVerticalAmplitude * shakeScale;
 
                 cameraHolder.localPosition = defaultCameraLocalPos + new Vector3(hOffset, vOffset, 0f);
             }

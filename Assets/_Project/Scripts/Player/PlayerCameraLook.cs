@@ -29,6 +29,10 @@ namespace EndlessHallway.Player
             set => canLook = value;
         }
 
+        private Camera targetCamera;
+
+        public Camera TargetCamera => targetCamera;
+
         private void Start()
         {
             if (playerBody == null && transform.parent != null)
@@ -38,9 +42,13 @@ namespace EndlessHallway.Player
 
             if (cameraTransform == null)
             {
-                Camera cam = GetComponentInChildren<Camera>();
-                if (cam != null) cameraTransform = cam.transform;
+                targetCamera = GetComponentInChildren<Camera>();
+                if (targetCamera != null) cameraTransform = targetCamera.transform;
                 else cameraTransform = transform;
+            }
+            else
+            {
+                targetCamera = cameraTransform.GetComponent<Camera>();
             }
 
             if (playerBody != null)
@@ -48,7 +56,34 @@ namespace EndlessHallway.Player
                 targetYaw = playerBody.eulerAngles.y;
             }
 
+            if (Core.SettingsManager.Instance != null)
+            {
+                Core.SettingsManager.Instance.OnSettingsChanged += HandleSettingsChanged;
+                ApplySettings();
+            }
+
             LockCursor();
+        }
+
+        private void OnDestroy()
+        {
+            if (Core.SettingsManager.Instance != null)
+            {
+                Core.SettingsManager.Instance.OnSettingsChanged -= HandleSettingsChanged;
+            }
+        }
+
+        private void HandleSettingsChanged()
+        {
+            ApplySettings();
+        }
+
+        public void ApplySettings()
+        {
+            if (Core.SettingsManager.Instance != null && targetCamera != null)
+            {
+                targetCamera.fieldOfView = Core.SettingsManager.Instance.FieldOfView;
+            }
         }
 
         private void Update()
@@ -57,8 +92,11 @@ namespace EndlessHallway.Player
 
             Vector2 lookInput = ReadLookInput();
 
+            bool invert = Core.SettingsManager.Instance != null && Core.SettingsManager.Instance.InvertY;
+            float pitchSign = invert ? 1f : -1f;
+
             targetYaw += lookInput.x * mouseSensitivity;
-            targetPitch -= lookInput.y * mouseSensitivity;
+            targetPitch += pitchSign * lookInput.y * mouseSensitivity;
             targetPitch = Mathf.Clamp(targetPitch, minPitch, maxPitch);
 
             if (smoothRotation)
