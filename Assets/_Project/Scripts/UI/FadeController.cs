@@ -51,7 +51,7 @@ namespace EndlessHallway.UI
 
             while (elapsed < duration)
             {
-                elapsed += Time.deltaTime;
+                elapsed += Time.unscaledDeltaTime;
                 canvasGroup.alpha = Mathf.Lerp(startAlpha, 1f, elapsed / duration);
                 yield return null;
             }
@@ -65,12 +65,22 @@ namespace EndlessHallway.UI
 
             while (elapsed < duration)
             {
-                elapsed += Time.deltaTime;
+                elapsed += Time.unscaledDeltaTime;
                 canvasGroup.alpha = Mathf.Lerp(startAlpha, 0f, elapsed / duration);
                 yield return null;
             }
             canvasGroup.alpha = 0f;
             canvasGroup.blocksRaycasts = false;
+        }
+
+        public void FadeIn(float duration = 1.0f)
+        {
+            StartCoroutine(FadeInRoutine(duration));
+        }
+
+        public void FadeOut(float duration = 1.0f)
+        {
+            StartCoroutine(FadeOutRoutine(duration));
         }
 
         public void FadeOutAndIn(float outDuration, float pauseDuration, float inDuration, Action onDark = null)
@@ -82,7 +92,7 @@ namespace EndlessHallway.UI
         {
             yield return StartCoroutine(FadeOutRoutine(outDuration));
             onDark?.Invoke();
-            yield return new WaitForSeconds(pauseDuration);
+            yield return new WaitForSecondsRealtime(pauseDuration);
             yield return StartCoroutine(FadeInRoutine(inDuration));
         }
     }

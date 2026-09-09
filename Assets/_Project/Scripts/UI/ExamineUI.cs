@@ -87,8 +87,13 @@ namespace EndlessHallway.UI
                 GameManager.Instance.SetState(GameState.Examining);
             }
 
-            if (titleText != null) titleText.text = examinable.Title;
-            if (bodyText != null) bodyText.text = examinable.DocumentText;
+            if (titleText != null) titleText.text = SanitizeText(examinable.Title);
+            if (bodyText != null) bodyText.text = SanitizeText(examinable.DocumentText);
+
+            if (SubtitleUI.Instance != null && SettingsManager.Instance != null && SettingsManager.Instance.SubtitlesEnabled)
+            {
+                SubtitleUI.Instance.ShowSubtitle($"[Reading: {examinable.Title}]", 2.5f);
+            }
 
             if (clueImage != null)
             {
@@ -106,6 +111,22 @@ namespace EndlessHallway.UI
             if (warmEffectIndicator != null)
             {
                 warmEffectIndicator.SetActive(examinable.IsWarmToTouch);
+                if (examinable.IsWarmToTouch)
+                {
+                    var tmp = warmEffectIndicator.GetComponent<TextMeshProUGUI>();
+                    if (tmp != null)
+                    {
+                        bool cb = Core.SettingsManager.Instance != null && Core.SettingsManager.Instance.ColorblindAssistance;
+                        tmp.text = cb 
+                            ? "[THERMAL ARTIFACT // RADIAL HEAT DETECTED]" 
+                            : "[The document radiates a faint, unsettling warmth...]";
+                    }
+                }
+            }
+
+            if (Core.SaveManager.Instance != null && !string.IsNullOrEmpty(examinable.ClueId))
+            {
+                Core.SaveManager.Instance.RecordClue(examinable.ClueId);
             }
 
             if (panelRoot != null) panelRoot.SetActive(true);
@@ -134,6 +155,20 @@ namespace EndlessHallway.UI
             {
                 GameManager.Instance.SetState(GameState.Exploring);
             }
+        }
+
+        private string SanitizeText(string input)
+        {
+            if (string.IsNullOrEmpty(input)) return "";
+            return input
+                .Replace('\u2018', '\'')  // Left single quotation mark
+                .Replace('\u2019', '\'')  // Right single quotation mark
+                .Replace('\u201C', '\"')  // Left double quotation mark
+                .Replace('\u201D', '\"')  // Right double quotation mark
+                .Replace('\u2013', '-')   // En dash
+                .Replace('\u2014', '-')   // Em dash
+                .Replace('\u2026', '.')   // Horizontal ellipsis
+                .Replace('\u00A0', ' ');  // Non-breaking space
         }
     }
 }
