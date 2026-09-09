@@ -5,7 +5,11 @@ namespace EndlessHallway.Core
 {
     public enum GameState
     {
-        Exploring,
+        MainMenu,
+        Exploring, // Gameplay
+        Paused,
+        GameOver,
+        Settings,
         InElevator,
         Examining,
         Ending
@@ -19,8 +23,11 @@ namespace EndlessHallway.Core
         public static GameManager Instance { get; private set; }
 
         [Header("State")]
-        [SerializeField] private GameState currentState = GameState.Exploring;
+        [SerializeField] private GameState currentState = GameState.MainMenu;
         public GameState CurrentState => currentState;
+
+        [Header("Diagnostics")]
+        [SerializeField] private bool logDiagnostics = false;
 
         public event Action<GameState> OnStateChanged;
 
@@ -36,7 +43,16 @@ namespace EndlessHallway.Core
 
         private void Start()
         {
-            SetState(GameState.Exploring);
+            // Detect if Main Menu is active in hierarchy on launch
+            var mainMenu = FindAnyObjectByType<UI.MainMenuUI>(FindObjectsInactive.Include);
+            if (mainMenu != null && mainMenu.gameObject.activeInHierarchy)
+            {
+                SetState(GameState.MainMenu);
+            }
+            else
+            {
+                SetState(GameState.Exploring);
+            }
 
             if (LoopManager.Instance != null)
             {
@@ -52,30 +68,70 @@ namespace EndlessHallway.Core
             }
         }
 
+        private void OnApplicationFocus(bool hasFocus)
+        {
+            if (!hasFocus) return;
+
+            // Enforce cursor visibility & lock state matching active state upon returning to application
+            ApplyCursorForState(currentState);
+        }
+
         public void SetState(GameState newState)
         {
-            if (currentState == newState) return;
-            currentState = newState;
-            OnStateChanged?.Invoke(currentState);
-
-            switch (currentState)
+            if (currentState == newState)
             {
-                case GameState.Exploring:
-                    Cursor.lockState = CursorLockMode.Locked;
-                    Cursor.visible = false;
-                    break;
-                case GameState.InElevator:
-                    // Controls can be partially limited
-                    break;
+                ApplyCursorForState(currentState);
+                return;
+            }
+
+            currentState = newState;
+            ApplyCursorForState(currentState);
+            OnStateChanged?.Invoke(currentState);
+            LogDiagnostics();
+        }
+
+        private void ApplyCursorForState(GameState state)
+        {
+            switch (state)
+            {
+                case GameState.MainMenu:
+                case GameState.Paused:
+                case GameState.GameOver:
+                case GameState.Settings:
                 case GameState.Examining:
-                    Cursor.lockState = CursorLockMode.None;
-                    Cursor.visible = true;
-                    break;
                 case GameState.Ending:
                     Cursor.lockState = CursorLockMode.None;
                     Cursor.visible = true;
+                    SetPlayerControls(false);
+                    break;
+
+                case GameState.Exploring:
+                case GameState.InElevator:
+                    Cursor.lockState = CursorLockMode.Locked;
+                    Cursor.visible = false;
+                    SetPlayerControls(true);
                     break;
             }
+        }
+
+        public void SetPlayerControls(bool enabled)
+        {
+            var player = FindAnyObjectByType<Player.PlayerController>();
+            if (player != null) player.CanMove = enabled;
+            var look = FindAnyObjectByType<Player.PlayerCameraLook>();
+            if (look != null) look.CanLook = enabled;
+            var interact = FindAnyObjectByType<Player.PlayerInteraction>();
+            if (interact != null) interact.CanInteract = enabled;
+        }
+
+        private void LogDiagnostics()
+        {
+            if (!logDiagnostics) return;
+            string stateStr = currentState.ToString().ToUpper();
+            string lockStr = Cursor.lockState.ToString().ToUpper();
+            string visStr = Cursor.visible ? "TRUE" : "FALSE";
+            string uiInput = (currentState == GameState.Exploring || currentState == GameState.InElevator) ? "GAMEPLAY" : "ACTIVE";
+            Debug.Log($"[GAME STATE] {stateStr} | CURSOR VISIBLE: {visStr} | CURSOR LOCK: {lockStr} | UI INPUT: {uiInput}");
         }
 
         [Header("Ending Volume Profiles")]
