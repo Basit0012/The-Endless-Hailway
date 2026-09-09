@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using EndlessHallway.Core;
+using EndlessHallway.UI;
 
 namespace EndlessHallway.Entity
 {
@@ -10,12 +11,13 @@ namespace EndlessHallway.Entity
         Hidden,
         GlimpseFar,
         GlimpseMirror,
-        Present
+        Present,
+        Aggressive
     }
 
     /// <summary>
     /// Controls the shadowy silhouette of Elias Voss.
-    /// Never chases; appears at fixed points and vanishes when looked at or approached.
+    /// Can vanish on look, stand motionless, or in late loops enter an aggressive pursuit state.
     /// </summary>
     public class ObserverController : MonoBehaviour, IResettable
     {
@@ -34,6 +36,12 @@ namespace EndlessHallway.Entity
         [SerializeField] private float directLookAngleThreshold = 25.0f;
         [SerializeField] private LayerMask occlusionLayers = ~0;
 
+        [Header("Aggressive State Settings")]
+        [SerializeField] private float aggressiveMoveSpeed = 3.2f;
+        [SerializeField] private float catchDistance = 1.25f;
+        [SerializeField] private float hesitationLingerLimit = 2.5f;
+        [SerializeField] private AudioClip jumpScareStingerClip;
+
         [Header("Audio Stinger")]
         [SerializeField] private AudioClip vanishStingerClip;
 
@@ -42,6 +50,8 @@ namespace EndlessHallway.Entity
         private readonly Dictionary<string, Transform> spawnPoints = new Dictionary<string, Transform>();
         private Camera playerCamera;
         private Transform playerTransform;
+        private float lingerTimer = 0f;
+        private bool isCatchingPlayer = false;
 
         private void Awake()
         {
@@ -51,6 +61,11 @@ namespace EndlessHallway.Entity
                 return;
             }
             Instance = this;
+
+            if (GetComponent<Audio.ProximityWhispers>() == null)
+            {
+                gameObject.AddComponent<Audio.ProximityWhispers>();
+            }
 
             RefreshSpawnPoints();
             SetVisible(false);
@@ -102,6 +117,8 @@ namespace EndlessHallway.Entity
             {
                 transform.SetPositionAndRotation(targetPt.position, targetPt.rotation);
                 currentState = state;
+                lingerTimer = 0f;
+                isCatchingPlayer = false;
                 SetVisible(true);
             }
             else
@@ -121,13 +138,20 @@ namespace EndlessHallway.Entity
         {
             if (currentState == ObserverState.Hidden || currentState == ObserverState.Present) return;
 
-            if (playerCamera == null)
+            if (playerCamera == null || playerTransform == null)
             {
                 FindPlayer();
-                if (playerCamera == null) return;
+                if (playerCamera == null || playerTransform == null) return;
             }
 
-            CheckPlayerGazeAndDistance();
+            if (currentState == ObserverState.Aggressive)
+            {
+                HandleAggressiveBehavior();
+            }
+            else
+            {
+                CheckPlayerGazeAndDistance();
+            }
         }
 
         private void CheckPlayerGazeAndDistance()
@@ -160,6 +184,188 @@ namespace EndlessHallway.Entity
             }
         }
 
+        private void HandleAggressiveBehavior()
+        {
+            if (isCatchingPlayer || playerCamera == null || playerTransform == null) return;
+
+            Vector3 toObserver = (transform.position + Vector3.up * 1f) - playerCamera.transform.position;
+            float distance = toObserver.magnitude;
+
+            // Look orientation towards player
+            Vector3 lookTarget = new Vector3(playerTransform.position.x, transform.position.y, playerTransform.position.z);
+            transform.LookAt(lookTarget);
+
+            float gazeAngle = Vector3.Angle(playerCamera.transform.forward, toObserver);
+            bool isLookingAt = gazeAngle < directLookAngleThreshold;
+
+            if (isLookingAt)
+            {
+                lingerTimer += Time.deltaTime;
+            }
+            else
+            {
+                // Player looked away! Advance immediately
+                lingerTimer += Time.deltaTime * 2.5f;
+            }
+
+            // Advance towards player if hesitation limit reached
+            if (lingerTimer > hesitationLingerLimit)
+            {
+                float step = aggressiveMoveSpeed * Time.deltaTime;
+                transform.position = Vector3.MoveTowards(transform.position, lookTarget, step);
+
+                if (distance < catchDistance)
+                {
+                    StartCoroutine(AggressiveJumpScareRoutine());
+                }
+            }
+        }
+
+        private System.Collections.IEnumerator AggressiveJumpScareRoutine()
+        {
+            isCatchingPlayer = true;
+            Debug.Log("[ObserverController] Observer caught player! Triggering jump scare fail state.");
+
+            // 1. Freeze player controls
+            var pController = FindAnyObjectByType<Player.PlayerController>();
+            var pLook = FindAnyObjectByType<Player.PlayerCameraLook>();
+            if (pController != null) pController.CanMove = false;
+            if (pLook != null) pLook.CanLook = false;
+
+            // 2. Violent camera snap directly onto Observer's face
+            if (playerCamera != null)
+            {
+                Vector3 toHead = (transform.position + Vector3.up * 1.6f) - playerCamera.transform.position;
+                Quaternion targetRot = Quaternion.LookRotation(toHead);
+                if (pLook != null)
+                {
+                    pLook.ResetRotation(targetRot.eulerAngles.y, targetRot.eulerAngles.x);
+                }
+            }
+
+            // 3. Jump scare stinger audio & stress spike
+            AudioClip stinger = jumpScareStingerClip != null ? jumpScareStingerClip : vanishStingerClip;
+            if (stinger != null && Audio.OneShotPool.Instance != null)
+            {
+                Audio.OneShotPool.Instance.Play2D(stinger, 1.0f, 0.95f);
+            }
+
+            if (UI.SubtitleUI.Instance != null)
+            {
+                UI.SubtitleUI.Instance.ShowSubtitle("[Violent audio stinger & impact]", 2.5f);
+            }
+
+            if (Player.PlayerStressSystem.Instance != null)
+            {
+                Player.PlayerStressSystem.Instance.AddTrauma(1.0f);
+            }
+
+            // 4. Screen flash & rapid fade to black
+            if (UI.FadeController.Instance != null)
+            {
+                // Softening check for photosensitivity
+                bool soften = SettingsManager.Instance != null && SettingsManager.Instance.PhotosensitivitySoftening;
+                if (!soften)
+                {
+                    UI.FadeController.Instance.SetColor(new Color(0.9f, 0.1f, 0.1f, 0.7f));
+                    yield return new WaitForSeconds(0.12f);
+                }
+
+                UI.FadeController.Instance.SetColor(Color.black);
+                yield return StartCoroutine(UI.FadeController.Instance.FadeOutRoutine(0.4f));
+            }
+            else
+            {
+                yield return new WaitForSeconds(0.4f);
+            }
+
+            yield return new WaitForSeconds(1.0f);
+
+            // 5. Present Game Over screen or reset loop
+            if (UIManager.Instance != null)
+            {
+                UIManager.Instance.ShowGameOver(
+                    onRetry: () =>
+                    {
+                        if (LoopManager.Instance != null)
+                        {
+                            int curLoop = LoopManager.Instance.CurrentLoop;
+                            LoopManager.Instance.ResetLoop(curLoop);
+
+                            var elevator = FindAnyObjectByType<Interaction.ElevatorController>();
+                            var spawnField = typeof(Interaction.ElevatorController).GetField("playerSpawnPoint", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                            Transform spawnPt = null;
+                            if (spawnField != null && elevator != null)
+                            {
+                                spawnPt = spawnField.GetValue(elevator) as Transform;
+                            }
+
+                            if (spawnPt != null && pController != null)
+                            {
+                                pController.Teleport(spawnPt.position, spawnPt.rotation);
+                            }
+                            else if (pController != null)
+                            {
+                                pController.Teleport(new Vector3(0f, 1.0f, -1.4f), Quaternion.identity);
+                            }
+                        }
+
+                        if (UI.FadeController.Instance != null)
+                        {
+                            UI.FadeController.Instance.FadeIn(1.2f);
+                        }
+
+                        if (pController != null) pController.CanMove = true;
+                        if (pLook != null) pLook.CanLook = true;
+                        isCatchingPlayer = false;
+                    },
+                    onExit: () =>
+                    {
+                        if (UIManager.Instance != null)
+                        {
+                            UIManager.Instance.ShowMainMenu();
+                        }
+                        isCatchingPlayer = false;
+                    }
+                );
+            }
+            else
+            {
+                // Fallback soft fail state
+                if (LoopManager.Instance != null)
+                {
+                    int curLoop = LoopManager.Instance.CurrentLoop;
+                    LoopManager.Instance.ResetLoop(curLoop);
+
+                    var elevator = FindAnyObjectByType<Interaction.ElevatorController>();
+                    var spawnField = typeof(Interaction.ElevatorController).GetField("playerSpawnPoint", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                    Transform spawnPt = null;
+                    if (spawnField != null && elevator != null)
+                    {
+                        spawnPt = spawnField.GetValue(elevator) as Transform;
+                    }
+
+                    if (spawnPt != null && pController != null)
+                    {
+                        pController.Teleport(spawnPt.position, spawnPt.rotation);
+                    }
+                    else if (pController != null)
+                    {
+                        pController.Teleport(new Vector3(0f, 1.0f, -1.4f), Quaternion.identity);
+                    }
+                }
+
+                if (UI.FadeController.Instance != null)
+                {
+                    yield return StartCoroutine(UI.FadeController.Instance.FadeInRoutine(1.2f));
+                }
+
+                if (pController != null) pController.CanMove = true;
+                if (pLook != null) pLook.CanLook = true;
+                isCatchingPlayer = false;
+            }
+        }
+
         public void Vanish()
         {
             if (currentState == ObserverState.Hidden) return;
@@ -170,6 +376,11 @@ namespace EndlessHallway.Entity
             if (vanishStingerClip != null && Audio.OneShotPool.Instance != null)
             {
                 Audio.OneShotPool.Instance.PlayOneShot(vanishStingerClip, transform.position, 0.5f);
+            }
+
+            if (UI.SubtitleUI.Instance != null)
+            {
+                UI.SubtitleUI.Instance.ShowSubtitle("[Cold metallic displacement whoosh]", 2.0f);
             }
         }
 
@@ -186,6 +397,8 @@ namespace EndlessHallway.Entity
         {
             SetVisible(false);
             currentState = ObserverState.Hidden;
+            lingerTimer = 0f;
+            isCatchingPlayer = false;
         }
     }
 }

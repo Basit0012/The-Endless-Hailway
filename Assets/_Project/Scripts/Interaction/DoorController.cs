@@ -125,12 +125,29 @@ namespace EndlessHallway.Interaction
             }
         }
 
+        public void SetOpenImmediate(bool open)
+        {
+            if (swingCoroutine != null) StopCoroutine(swingCoroutine);
+            isMoving = false;
+            isOpen = open;
+            pivotTransform.localRotation = isOpen ? openRotation : closedRotation;
+        }
+
         public void SetLocked(bool locked)
         {
             isLocked = locked;
             if (isLocked && isOpen)
             {
                 SetOpen(false);
+            }
+        }
+
+        public void SetLockedImmediate(bool locked)
+        {
+            isLocked = locked;
+            if (isLocked && isOpen)
+            {
+                SetOpenImmediate(false);
             }
         }
 

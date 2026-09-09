@@ -119,7 +119,7 @@ namespace EndlessHallway.Interaction
                 OneShotPool.Instance.Play2D(elevatorRideHumClip, 0.7f);
             }
 
-            yield return new WaitForSeconds(0.6f);
+            yield return new WaitForSecondsRealtime(0.6f);
 
             // 3. Fade out
             if (FadeController.Instance != null)
@@ -128,7 +128,7 @@ namespace EndlessHallway.Interaction
             }
             else
             {
-                yield return new WaitForSeconds(0.8f);
+                yield return new WaitForSecondsRealtime(0.8f);
             }
 
             // 4. Advance Loop & Reset Scene
@@ -147,7 +147,7 @@ namespace EndlessHallway.Interaction
                 }
             }
 
-            yield return new WaitForSeconds(0.5f);
+            yield return new WaitForSecondsRealtime(0.5f);
 
             // 5. Fade In
             if (FadeController.Instance != null)
@@ -185,7 +185,7 @@ namespace EndlessHallway.Interaction
 
             while (elapsed < 1f)
             {
-                elapsed += Time.deltaTime * doorSpeed;
+                elapsed += Time.unscaledDeltaTime * doorSpeed;
                 float t = Mathf.SmoothStep(0f, 1f, elapsed);
 
                 if (leftDoor != null) leftDoor.localPosition = Vector3.Lerp(startLeft, targetLeft, t);
