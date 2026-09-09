@@ -25,14 +25,21 @@ namespace EndlessHallway.Editor
         public static void RunMasterBuild()
         {
             Debug.Log("[MasterBuildUtility] === Starting Full Game Setup ===");
+            if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name != "Main")
+            {
+                UnityEditor.SceneManagement.EditorSceneManager.OpenScene("Assets/_Project/Scenes/Main.unity");
+            }
             GenerateAllAudioClips();
             GenerateAllClueSprites();
+            GenerateAllPaintingPool();
             ConfigurePBRMaterials();
             BuildVolumeProfiles();
             SetupRoom214AndCorridor();
             BuildClueObjectsInScene();
             BuildAllLoopScriptableObjects();
             ConfigureExamineUI();
+            BuildPauseAndSettingsUI();
+            BuildMainMenuUI();
 
             UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(UnityEngine.SceneManagement.SceneManager.GetActiveScene());
             UnityEditor.SceneManagement.EditorSceneManager.SaveOpenScenes();
@@ -125,8 +132,84 @@ namespace EndlessHallway.Editor
             }
             WriteWav(audioPath + "/sfx_paper_rustle.wav", paperSamples, sr);
 
+            // 5. Heartbeat WAV (Lub-Dub cycle, 1.0s clean loop)
+            int hbTotal = (int)(sr * 1.0f);
+            float[] hbSamples = new float[hbTotal];
+            for (int i = 0; i < hbTotal; i++)
+            {
+                float t = (float)i / sr;
+                float s = 0f;
+                if (t >= 0.0f && t < 0.16f)
+                {
+                    float env = Mathf.Sin((t / 0.16f) * Mathf.PI);
+                    s += Mathf.Sin(2f * Mathf.PI * 55f * t) * env * 0.95f;
+                    s += Mathf.Sin(2f * Mathf.PI * 110f * t) * env * 0.3f;
+                }
+                if (t >= 0.22f && t < 0.36f)
+                {
+                    float tRel = t - 0.22f;
+                    float env = Mathf.Sin((tRel / 0.14f) * Mathf.PI);
+                    s += Mathf.Sin(2f * Mathf.PI * 68f * t) * env * 0.75f;
+                    s += Mathf.Sin(2f * Mathf.PI * 136f * t) * env * 0.25f;
+                }
+                hbSamples[i] = Mathf.Clamp(s, -1f, 1f);
+            }
+            WriteWav(audioPath + "/sfx_heartbeat.wav", hbSamples, sr);
+
+            // 6. Ragged Breathing WAV (3.0s inhale/exhale cycle)
+            int brTotal = (int)(sr * 3.0f);
+            float[] brSamples = new float[brTotal];
+            for (int i = 0; i < brTotal; i++)
+            {
+                float t = (float)i / sr;
+                float env = 0f;
+                float centerFreq = 400f;
+                if (t >= 0.2f && t < 1.3f)
+                {
+                    env = Mathf.Sin(((t - 0.2f) / 1.1f) * Mathf.PI) * 0.45f;
+                    centerFreq = 500f + (t - 0.2f) * 150f;
+                }
+                else if (t >= 1.5f && t < 2.8f)
+                {
+                    env = Mathf.Sin(((t - 1.5f) / 1.3f) * Mathf.PI) * 0.55f;
+                    centerFreq = 450f - (t - 1.5f) * 80f;
+                }
+                float whiteNoise = ((float)rng.NextDouble() * 2f - 1f);
+                float formant = Mathf.Sin(2f * Mathf.PI * centerFreq * t) * 0.25f;
+                brSamples[i] = Mathf.Clamp((whiteNoise * 0.75f + formant) * env, -1f, 1f);
+            }
+            WriteWav(audioPath + "/sfx_breathing.wav", brSamples, sr);
+
+            // 7. Ambient Whispers WAV (4.0s reversed vocal murmurs)
+            int whTotal = (int)(sr * 4.0f);
+            float[] whSamples = new float[whTotal];
+            for (int i = 0; i < whTotal; i++)
+            {
+                float t = (float)i / sr;
+                float mod = Mathf.Sin(2f * Mathf.PI * 2.5f * t) * 0.5f + 0.5f;
+                float noise = ((float)rng.NextDouble() * 2f - 1f) * 0.3f;
+                float v1 = Mathf.Sin(2f * Mathf.PI * (220f + Mathf.Sin(t * 3f) * 40f) * t) * 0.25f;
+                float v2 = Mathf.Sin(2f * Mathf.PI * 720f * t) * 0.15f;
+                whSamples[i] = Mathf.Clamp((noise + v1 + v2) * mod * 0.45f, -1f, 1f);
+            }
+            WriteWav(audioPath + "/amb_whispers.wav", whSamples, sr);
+
+            // 8. Jump Scare Stinger WAV (Violent sub impact + high dissonant screech)
+            int jsTotal = (int)(sr * 1.8f);
+            float[] jsSamples = new float[jsTotal];
+            for (int i = 0; i < jsTotal; i++)
+            {
+                float t = (float)i / sr;
+                float env = Mathf.Exp(-t * 3.5f);
+                float sub = Mathf.Sin(2f * Mathf.PI * (80f - t * 25f) * t) * 0.8f;
+                float screech = (Mathf.Sin(2f * Mathf.PI * 2400f * t) + Mathf.Sin(2f * Mathf.PI * 3100f * t)) * 0.4f;
+                float impact = ((float)rng.NextDouble() * 2f - 1f) * 0.6f;
+                jsSamples[i] = Mathf.Clamp((sub + screech + impact) * env, -1f, 1f);
+            }
+            WriteWav(audioPath + "/sfx_jumpscare.wav", jsSamples, sr);
+
             AssetDatabase.Refresh();
-            Debug.Log("[MasterBuildUtility] Extended audio clips generated.");
+            Debug.Log("[MasterBuildUtility] Extended audio clips generated (Heartbeat, Breathing, Whispers, JumpScare).");
         }
 
         private static void WriteWav(string filePath, float[] samples, int sampleRate)
@@ -348,6 +431,278 @@ namespace EndlessHallway.Editor
         }
         #endregion
 
+        #region 2.5 Painting Pool Generation
+        [MenuItem("Tools/Endless Hallway/Paintings: Generate Painting Pool", false, 115)]
+        public static void GenerateAllPaintingPool()
+        {
+            string texDir = "Assets/_Project/Art/Textures/Paintings";
+            string matDir = "Assets/_Project/Materials/Paintings";
+            string setDir = "Assets/_Project/ScriptableObjects/Anomalies";
+            if (!Directory.Exists(texDir)) Directory.CreateDirectory(texDir);
+            if (!Directory.Exists(matDir)) Directory.CreateDirectory(matDir);
+            if (!Directory.Exists(setDir)) Directory.CreateDirectory(setDir);
+
+            int size = 512;
+            var stageMaterials = new List<Material>();
+
+            for (int stage = 0; stage < 5; stage++)
+            {
+                string texPath = $"{texDir}/T_Painting_Stage{stage}.png";
+                string matPath = $"{matDir}/M_Painting_Stage{stage}.mat";
+
+                Texture2D tex = CreatePaintingTexture(stage, size);
+                byte[] png = tex.EncodeToPNG();
+                File.WriteAllBytes(texPath, png);
+                UnityEngine.Object.DestroyImmediate(tex);
+
+                AssetDatabase.ImportAsset(texPath, ImportAssetOptions.ForceUpdate);
+                var importer = AssetImporter.GetAtPath(texPath) as TextureImporter;
+                if (importer != null)
+                {
+                    importer.textureType = TextureImporterType.Default;
+                    importer.filterMode = FilterMode.Bilinear;
+                    importer.SaveAndReimport();
+                }
+
+                Texture2D importedTex = AssetDatabase.LoadAssetAtPath<Texture2D>(texPath);
+
+                Material mat = AssetDatabase.LoadAssetAtPath<Material>(matPath);
+                if (mat == null)
+                {
+                    var shader = Shader.Find("Universal Render Pipeline/Lit");
+                    if (shader == null) shader = Shader.Find("Standard");
+                    mat = new Material(shader);
+                    AssetDatabase.CreateAsset(mat, matPath);
+                }
+                if (importedTex != null)
+                {
+                    mat.SetTexture("_BaseMap", importedTex);
+                }
+                mat.SetFloat("_Smoothness", 0.15f);
+                EditorUtility.SetDirty(mat);
+                stageMaterials.Add(mat);
+            }
+
+            var paintingSet = AssetDatabase.LoadAssetAtPath<PaintingSet>($"{setDir}/Set_WallPaintings.asset");
+            if (paintingSet == null)
+            {
+                paintingSet = ScriptableObject.CreateInstance<PaintingSet>();
+                AssetDatabase.CreateAsset(paintingSet, $"{setDir}/Set_WallPaintings.asset");
+            }
+            paintingSet.stageMaterials = stageMaterials;
+            EditorUtility.SetDirty(paintingSet);
+
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+            Debug.Log("[MasterBuildUtility] All 5 Mutating Painting Stages generated and PaintingSet configured.");
+        }
+
+        private static Texture2D CreatePaintingTexture(int stage, int size)
+        {
+            Texture2D tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
+            var rng = new System.Random(1337 + stage * 71);
+
+            for (int y = 0; y < size; y++)
+            {
+                for (int x = 0; x < size; x++)
+                {
+                    float u = (float)x / size;
+                    float v = (float)y / size;
+                    Color c = Color.black;
+
+                    float noise = ((float)rng.NextDouble() * 2f - 1f) * 0.05f;
+
+                    if (stage == 0) // Desolate Countryside Landscape
+                    {
+                        if (v > 0.42f)
+                        {
+                            float skyT = (v - 0.42f) / 0.58f;
+                            c = Color.Lerp(new Color(0.86f, 0.83f, 0.70f), new Color(0.70f, 0.72f, 0.65f), skyT);
+                        }
+                        else
+                        {
+                            float groundT = v / 0.42f;
+                            float hill = Mathf.Sin(u * 5f) * 0.04f;
+                            c = Color.Lerp(new Color(0.20f, 0.22f, 0.14f), new Color(0.38f, 0.36f, 0.22f), Mathf.Clamp01(groundT + hill));
+                        }
+
+                        // Homestead on horizon
+                        if (u >= 0.46f && u <= 0.54f && v >= 0.40f && v <= 0.48f)
+                        {
+                            c = new Color(0.18f, 0.15f, 0.12f);
+                        }
+                        if (v > 0.48f && v <= 0.53f)
+                        {
+                            float roofHalfW = (0.53f - v) * 0.8f;
+                            if (Mathf.Abs(u - 0.50f) <= roofHalfW) c = new Color(0.14f, 0.11f, 0.09f);
+                        }
+                    }
+                    else if (stage == 1) // Subtle Wrongness
+                    {
+                        if (v > 0.42f)
+                        {
+                            float skyT = (v - 0.42f) / 0.58f;
+                            c = Color.Lerp(new Color(0.75f, 0.82f, 0.72f), new Color(0.55f, 0.65f, 0.60f), skyT);
+                        }
+                        else
+                        {
+                            float groundT = v / 0.42f;
+                            c = Color.Lerp(new Color(0.15f, 0.18f, 0.15f), new Color(0.28f, 0.30f, 0.20f), groundT);
+                        }
+
+                        if (u >= 0.46f && u <= 0.54f && v >= 0.40f && v <= 0.48f)
+                        {
+                            c = new Color(0.12f, 0.10f, 0.09f);
+                            if ((u >= 0.475f && u <= 0.495f && v >= 0.43f && v <= 0.46f) ||
+                                (u >= 0.505f && u <= 0.525f && v >= 0.43f && v <= 0.46f))
+                            {
+                                c = Color.black;
+                                if (u >= 0.482f && u <= 0.488f && v >= 0.442f && v <= 0.448f)
+                                {
+                                    c = new Color(0.85f, 0.85f, 0.82f);
+                                }
+                            }
+                        }
+                        if (v > 0.48f && v <= 0.53f)
+                        {
+                            float roofHalfW = (0.53f - v) * 0.8f;
+                            if (Mathf.Abs(u - 0.50f) <= roofHalfW) c = new Color(0.10f, 0.08f, 0.07f);
+                        }
+                    }
+                    else if (stage == 2) // Dollhouse Room with Porcelain Doll
+                    {
+                        if (v > 0.35f)
+                        {
+                            if (v > 0.50f)
+                            {
+                                float stripe = Mathf.Sin(u * 80f) > 0.7f ? 0.05f : 0f;
+                                c = new Color(0.82f + stripe, 0.75f + stripe, 0.45f);
+                            }
+                            else
+                            {
+                                float panel = (Mathf.Repeat(u * 12f, 1f) < 0.08f) ? -0.1f : 0f;
+                                c = new Color(0.14f + panel, 0.32f + panel, 0.35f);
+                            }
+                        }
+                        else
+                        {
+                            float perspY = (0.35f - v) / 0.35f;
+                            float checkX = (u - 0.5f) / (1f - perspY * 0.7f) * 8f;
+                            float checkY = 1f / (perspY + 0.15f) * 1.5f;
+                            bool isWhite = ((int)Mathf.Floor(checkX) + (int)Mathf.Floor(checkY)) % 2 == 0;
+                            c = isWhite ? new Color(0.82f, 0.80f, 0.74f) : new Color(0.08f, 0.10f, 0.12f);
+                        }
+
+                        if (u >= 0.42f && u <= 0.58f && v >= 0.20f && v <= 0.60f)
+                        {
+                            if (Mathf.Abs(u - 0.50f) > 0.05f || (v >= 0.32f && v <= 0.36f))
+                            {
+                                c = new Color(0.25f, 0.14f, 0.08f);
+                            }
+                        }
+
+                        float dx = (u - 0.50f) * 1.1f;
+                        float dy = (v - 0.54f);
+                        float dist = Mathf.Sqrt(dx * dx + dy * dy);
+                        if (dist < 0.09f)
+                        {
+                            c = new Color(0.94f, 0.92f, 0.88f);
+                            if (Mathf.Abs(dx) > 0.035f && dy < 0.01f && dy > -0.04f)
+                            {
+                                c = Color.Lerp(c, new Color(0.95f, 0.45f, 0.45f), 0.55f);
+                            }
+                            if ((Mathf.Abs(dx - 0.035f) < 0.015f || Mathf.Abs(dx + 0.035f) < 0.015f) && Mathf.Abs(dy - 0.02f) < 0.02f)
+                            {
+                                c = new Color(0.05f, 0.08f, 0.12f);
+                                if (dx > 0 && dy > 0.025f) c = Color.white;
+                            }
+                            if (Mathf.Abs(dx) < 0.012f && dy < -0.045f && dy > -0.06f)
+                            {
+                                c = new Color(0.85f, 0.2f, 0.25f);
+                            }
+                        }
+                    }
+                    else if (stage == 3) // Grotesque Melt & Corrupted Doll
+                    {
+                        if (v > 0.35f)
+                        {
+                            c = (v > 0.50f) ? new Color(0.65f, 0.60f, 0.25f) : new Color(0.08f, 0.22f, 0.24f);
+                            float drip = Mathf.PerlinNoise(u * 15f, v * 3f);
+                            if (drip > 0.68f) c = new Color(0.04f, 0.04f, 0.04f);
+                        }
+                        else
+                        {
+                            c = new Color(0.06f, 0.08f, 0.09f);
+                        }
+
+                        float dx = (u - 0.50f) * 1.3f;
+                        float dy = (v - 0.52f);
+                        float dist = Mathf.Sqrt(dx * dx + dy * dy);
+                        if (dist < 0.11f)
+                        {
+                            c = new Color(0.88f, 0.85f, 0.78f);
+                            if ((Mathf.Abs(dx - 0.038f) < 0.022f || Mathf.Abs(dx + 0.038f) < 0.022f) && dy > 0f && dy < 0.05f)
+                            {
+                                c = Color.black;
+                            }
+                            if ((Mathf.Abs(dx - 0.038f) < 0.012f || Mathf.Abs(dx + 0.038f) < 0.012f) && dy <= 0f && dy > -0.12f)
+                            {
+                                c = Color.black;
+                            }
+                            if (Mathf.Abs(dx) < 0.022f && dy < -0.02f && dy > -0.09f)
+                            {
+                                c = Color.black;
+                            }
+                        }
+
+                        if (u < 0.1f || u > 0.9f)
+                        {
+                            c = Color.Lerp(c, new Color(0.8f, 0.1f, 0.2f), 0.4f);
+                        }
+                    }
+                    else // Stage 4: Full Nightmare / Voss in Burning Corridor
+                    {
+                        float corridorDepth = Mathf.Abs(u - 0.5f) * 2f;
+                        float fireGlow = Mathf.PerlinNoise(u * 8f, v * 8f);
+                        Color fireColor = Color.Lerp(new Color(0.95f, 0.40f, 0.08f), new Color(0.45f, 0.08f, 0.04f), v);
+                        c = Color.Lerp(new Color(0.08f, 0.04f, 0.04f), fireColor, (1f - corridorDepth * 0.7f) * fireGlow);
+
+                        if (Mathf.Abs(u - 0.5f) < 0.12f && v > 0.35f && v < 0.75f)
+                        {
+                            c = Color.Lerp(c, new Color(1.0f, 0.85f, 0.35f), 0.85f);
+                        }
+
+                        float bodyX = Mathf.Abs(u - 0.5f);
+                        float headDist = Vector2.Distance(new Vector2(u, v), new Vector2(0.5f, 0.68f));
+                        bool isHead = headDist < 0.065f;
+                        bool isTorso = bodyX < 0.14f && v >= 0.20f && v <= 0.65f;
+                        bool isArms = bodyX < (0.28f - (v - 0.2f) * 0.3f) && v >= 0.15f && v <= 0.50f;
+
+                        if (isHead || isTorso || isArms)
+                        {
+                            c = new Color(0.02f, 0.02f, 0.03f, 1f);
+                        }
+
+                        if (rng.NextDouble() < 0.015)
+                        {
+                            c = new Color(1.0f, 0.7f, 0.2f, 1f);
+                        }
+                    }
+
+                    float edgeDist = Mathf.Min(Mathf.Min(u, 1f - u), Mathf.Min(v, 1f - v));
+                    float vignette = Mathf.Clamp01(edgeDist * 10f);
+                    c += new Color(noise, noise, noise, 0f);
+                    c = Color.Lerp(new Color(0.05f, 0.05f, 0.05f, 1f), c, vignette);
+
+                    tex.SetPixel(x, y, c);
+                }
+            }
+
+            tex.Apply();
+            return tex;
+        }
+        #endregion
+
         #region 3. PBR Materials & Normal Maps
         [MenuItem("Tools/Endless Hallway/Materials: Configure PBR Materials", false, 12)]
         public static void ConfigurePBRMaterials()
@@ -487,12 +842,13 @@ namespace EndlessHallway.Editor
             string volDir = "Assets/_Project/Settings/Volumes";
             if (!Directory.Exists(volDir)) Directory.CreateDirectory(volDir);
 
-            // 1. Normal Profile (Loop 0-3 Baseline)
+            // 1. Normal Profile (Loop 0-3 Baseline with subtle surreal fisheye)
             VolumeProfile profNormal = CreateOrLoadProfile(volDir + "/VolumeProfile_Normal.asset");
             var caNormal = GetOrAdd<ColorAdjustments>(profNormal);
             caNormal.postExposure.Override(0.0f);
-            caNormal.contrast.Override(12f);
-            caNormal.saturation.Override(-5f);
+            caNormal.contrast.Override(14f);
+            caNormal.saturation.Override(-8f);
+            caNormal.colorFilter.Override(new Color(0.97f, 0.96f, 0.90f)); // subtle warm yellow wall cast
             var vigNormal = GetOrAdd<Vignette>(profNormal);
             vigNormal.intensity.Override(0.35f);
             vigNormal.smoothness.Override(0.4f);
@@ -502,39 +858,58 @@ namespace EndlessHallway.Editor
             var bloomNormal = GetOrAdd<Bloom>(profNormal);
             bloomNormal.intensity.Override(0.45f);
             bloomNormal.threshold.Override(0.9f);
+            var ldNormal = GetOrAdd<LensDistortion>(profNormal);
+            ldNormal.intensity.Override(-0.08f); // subtle permanent barrel distortion
+            ldNormal.xMultiplier.Override(1f);
+            ldNormal.yMultiplier.Override(1f);
+            var splitNormal = GetOrAdd<SplitToning>(profNormal);
+            splitNormal.shadows.Override(new Color(0.12f, 0.24f, 0.24f)); // subtle teal shadow
+            splitNormal.highlights.Override(new Color(0.96f, 0.92f, 0.78f)); // dollhouse yellow highlight
             EditorUtility.SetDirty(profNormal);
 
-            // 2. FlickerShift Profile (Loop 4-5 Shift)
+            // 2. FlickerShift Profile (Loop 4-5 Shift: escalating fisheye and sickly yellow-over-teal)
             VolumeProfile profShift = CreateOrLoadProfile(volDir + "/VolumeProfile_FlickerShift.asset");
             var caShift = GetOrAdd<ColorAdjustments>(profShift);
             caShift.postExposure.Override(-0.35f);
-            caShift.contrast.Override(25f);
-            caShift.saturation.Override(-28f);
-            caShift.colorFilter.Override(new Color(0.85f, 0.95f, 0.90f)); // sickly pale greenish tint
+            caShift.contrast.Override(28f);
+            caShift.saturation.Override(-32f);
+            caShift.colorFilter.Override(new Color(0.90f, 0.94f, 0.82f)); // sickly pale mustard-green tint
             var vigShift = GetOrAdd<Vignette>(profShift);
-            vigShift.intensity.Override(0.50f);
+            vigShift.intensity.Override(0.52f);
             vigShift.smoothness.Override(0.45f);
             var grainShift = GetOrAdd<FilmGrain>(profShift);
-            grainShift.intensity.Override(0.45f);
+            grainShift.intensity.Override(0.48f);
             grainShift.type.Override(FilmGrainLookup.Large01);
             var splitShift = GetOrAdd<SplitToning>(profShift);
-            splitShift.shadows.Override(new Color(0.12f, 0.22f, 0.20f));
-            splitShift.highlights.Override(new Color(0.95f, 0.90f, 0.70f));
+            splitShift.shadows.Override(new Color(0.08f, 0.25f, 0.24f)); // rich teal shadow
+            splitShift.highlights.Override(new Color(0.94f, 0.88f, 0.55f)); // sickly yellow highlight
+            var ldShift = GetOrAdd<LensDistortion>(profShift);
+            ldShift.intensity.Override(-0.25f); // prominent warped fisheye framing
+            ldShift.xMultiplier.Override(1f);
+            ldShift.yMultiplier.Override(1f);
+            var caChromaShift = GetOrAdd<ChromaticAberration>(profShift);
+            caChromaShift.intensity.Override(0.35f); // lens chromatic fringing
             EditorUtility.SetDirty(profShift);
 
-            // 3. NearDark Profile (Loop 6 The Darkening)
+            // 3. NearDark Profile (Loop 6 The Darkening: intense fisheye and severe chromatic aberration)
             VolumeProfile profDark = CreateOrLoadProfile(volDir + "/VolumeProfile_NearDark.asset");
             var caDark = GetOrAdd<ColorAdjustments>(profDark);
             caDark.postExposure.Override(-1.35f);
-            caDark.contrast.Override(38f);
-            caDark.saturation.Override(-55f);
+            caDark.contrast.Override(40f);
+            caDark.saturation.Override(-60f);
             caDark.colorFilter.Override(new Color(0.70f, 0.75f, 0.80f));
             var vigDark = GetOrAdd<Vignette>(profDark);
-            vigDark.intensity.Override(0.68f);
+            vigDark.intensity.Override(0.70f);
             vigDark.smoothness.Override(0.55f);
             var grainDark = GetOrAdd<FilmGrain>(profDark);
-            grainDark.intensity.Override(0.65f);
+            grainDark.intensity.Override(0.70f);
             grainDark.type.Override(FilmGrainLookup.Large02);
+            var ldDark = GetOrAdd<LensDistortion>(profDark);
+            ldDark.intensity.Override(-0.42f); // heavy warped fisheye claustrophobia
+            ldDark.xMultiplier.Override(1f);
+            ldDark.yMultiplier.Override(1f);
+            var caChromaDark = GetOrAdd<ChromaticAberration>(profDark);
+            caChromaDark.intensity.Override(0.65f);
             EditorUtility.SetDirty(profDark);
 
             // 4. Acceptance Profile (Cathartic warm closure)
@@ -549,9 +924,11 @@ namespace EndlessHallway.Editor
             var bloomAccept = GetOrAdd<Bloom>(profAccept);
             bloomAccept.intensity.Override(1.2f);
             bloomAccept.threshold.Override(0.7f);
+            var ldAccept = GetOrAdd<LensDistortion>(profAccept);
+            ldAccept.intensity.Override(0f); // clean, unwarped reality
             EditorUtility.SetDirty(profAccept);
 
-            // 5. Erosion Profile (Cold endless abyss)
+            // 5. Erosion Profile (Cold endless abyss with maximum optical distortion)
             VolumeProfile profErosion = CreateOrLoadProfile(volDir + "/VolumeProfile_Erosion.asset");
             var caErosion = GetOrAdd<ColorAdjustments>(profErosion);
             caErosion.postExposure.Override(-1.8f);
@@ -561,6 +938,10 @@ namespace EndlessHallway.Editor
             vigErosion.intensity.Override(0.85f);
             var grainErosion = GetOrAdd<FilmGrain>(profErosion);
             grainErosion.intensity.Override(0.85f);
+            var ldErosion = GetOrAdd<LensDistortion>(profErosion);
+            ldErosion.intensity.Override(-0.55f);
+            var caChromaErosion = GetOrAdd<ChromaticAberration>(profErosion);
+            caChromaErosion.intensity.Override(0.85f);
             EditorUtility.SetDirty(profErosion);
 
             AssetDatabase.SaveAssets();
@@ -1224,7 +1605,8 @@ namespace EndlessHallway.Editor
             canvas.transform.localPosition = new Vector3(0f, 0f, -0.025f);
             canvas.transform.localRotation = Quaternion.Euler(0f, 180f, 0f);
             canvas.transform.localScale = new Vector3(0.72f, 0.52f, 1f);
-            canvas.GetComponent<Renderer>().sharedMaterial = paintingCanvasMat != null ? paintingCanvasMat : paperMat;
+            var stage0Mat = AssetDatabase.LoadAssetAtPath<Material>("Assets/_Project/Materials/Paintings/M_Painting_Stage0.mat");
+            canvas.GetComponent<Renderer>().sharedMaterial = stage0Mat != null ? stage0Mat : (paintingCanvasMat != null ? paintingCanvasMat : paperMat);
             UnityEngine.Object.DestroyImmediate(canvas.GetComponent<Collider>());
 
             var pTarget = paintObj.AddComponent<AnomalyTarget>();
@@ -1406,6 +1788,34 @@ namespace EndlessHallway.Editor
                 a.observerState = ObserverState.Present;
             });
 
+            // Mutating Painting Anomalies
+            string matDir = "Assets/_Project/Materials/Paintings";
+            Material mStage2 = AssetDatabase.LoadAssetAtPath<Material>(matDir + "/M_Painting_Stage2.mat");
+            Material mStage3 = AssetDatabase.LoadAssetAtPath<Material>(matDir + "/M_Painting_Stage3.mat");
+            Material mStage4 = AssetDatabase.LoadAssetAtPath<Material>(matDir + "/M_Painting_Stage4.mat");
+
+            var aPaintingStage2 = CreateAnomaly(anomDir + "/Anom_Painting_Stage2.asset", "Anom_Painting_Stage2", "WallPainting_A", AnomalyType.MaterialSwap, a => {
+                a.description = "The framed landscape transforms into an uncanny dollhouse room with a staring porcelain doll.";
+                a.targetMaterial = mStage2;
+            });
+
+            var aPaintingStage3 = CreateAnomaly(anomDir + "/Anom_Painting_Stage3.asset", "Anom_Painting_Stage3", "WallPainting_A", AnomalyType.MaterialSwap, a => {
+                a.description = "The doll painting corrupts into weeping black oil and an unhinged screaming mouth.";
+                a.targetMaterial = mStage3;
+            });
+
+            var aPaintingStage4 = CreateAnomaly(anomDir + "/Anom_Painting_Stage4.asset", "Anom_Painting_Stage4", "WallPainting_A", AnomalyType.MaterialSwap, a => {
+                a.description = "The painting depicts the corridor in flames with the Observer reaching out from the canvas.";
+                a.targetMaterial = mStage4;
+            });
+
+            // Aggressive Observer Anomaly (Loop 6 Soft Fail / Stalker)
+            var aObsAggressive = CreateAnomaly(anomDir + "/Anom_Observer_Aggressive.asset", "Anom_Observer_Aggressive", "ObserverEntity", AnomalyType.ObserverSpawn, a => {
+                a.description = "Observer stalks aggressively down the corridor if the player looks away or lingers.";
+                a.observerSpawnPointId = "FarHallway";
+                a.observerState = ObserverState.Aggressive;
+            });
+
             // Now Create LoopConfigSO Assets
             LoopConfigSO CreateLoopConfig(string path, int idx, string title, List<AnomalyDefinitionSO> anoms, AudioClip ambient = null, float ambVol = 0.35f)
             {
@@ -1427,10 +1837,10 @@ namespace EndlessHallway.Editor
             var l0 = CreateLoopConfig(loopDir + "/Loop_00_Baseline.asset", 0, "Loop 0 - Baseline", new List<AnomalyDefinitionSO>(), droneClip, 0.35f);
             var l1 = CreateLoopConfig(loopDir + "/Loop_01_FirstWrongness.asset", 1, "Loop 1 - The First Wrongness", new List<AnomalyDefinitionSO> { aTilt }, droneClip, 0.35f);
             var l2 = CreateLoopConfig(loopDir + "/Loop_02_DoorAndLight.asset", 2, "Loop 2 - Door and Light", new List<AnomalyDefinitionSO> { aDoor212, aLight214 }, droneClip, 0.40f);
-            var l3 = CreateLoopConfig(loopDir + "/Loop_03_FirstEncounter.asset", 3, "Loop 3 - First Glimpse", new List<AnomalyDefinitionSO> { aObsFar, aLight214 }, droneClip, 0.45f);
+            var l3 = CreateLoopConfig(loopDir + "/Loop_03_FirstEncounter.asset", 3, "Loop 3 - First Glimpse", new List<AnomalyDefinitionSO> { aObsFar, aLight214, aPaintingStage2 }, droneClip, 0.45f);
             var l4 = CreateLoopConfig(loopDir + "/Loop_04_TheShift.asset", 4, "Loop 4 - The Shift", new List<AnomalyDefinitionSO> { aVolShift, aLight214Off, aSpawnInc1 }, droneClip, 0.50f);
-            var l5 = CreateLoopConfig(loopDir + "/Loop_05_DeepWrongness.asset", 5, "Loop 5 - Deep Wrongness", new List<AnomalyDefinitionSO> { aVolShift, aDoor216, aSpawnVoice, aObsMirror }, droneClip, 0.55f);
-            var l6 = CreateLoopConfig(loopDir + "/Loop_06_TheDarkening.asset", 6, "Loop 6 - The Darkening", new List<AnomalyDefinitionSO> { aVolDark, aAllLightsOff, aEmergencyLightOn, aSpawnInc2, aPhoneRing }, droneClip, 0.65f);
+            var l5 = CreateLoopConfig(loopDir + "/Loop_05_DeepWrongness.asset", 5, "Loop 5 - Deep Wrongness", new List<AnomalyDefinitionSO> { aVolShift, aDoor216, aSpawnVoice, aObsMirror, aPaintingStage3 }, droneClip, 0.55f);
+            var l6 = CreateLoopConfig(loopDir + "/Loop_06_TheDarkening.asset", 6, "Loop 6 - The Darkening", new List<AnomalyDefinitionSO> { aVolDark, aAllLightsOff, aEmergencyLightOn, aSpawnInc2, aPhoneRing, aPaintingStage4, aObsAggressive }, droneClip, 0.65f);
             var l7 = CreateLoopConfig(loopDir + "/Loop_07_TheChoice.asset", 7, "Loop 7 - The Choice", new List<AnomalyDefinitionSO> { aDoor214Open, aSpot214On, aPhoneCall, aObsDoorway }, droneClip, 0.70f);
 
             // Wire all LoopConfigs into AnomalyManager in the scene
@@ -1474,8 +1884,7 @@ namespace EndlessHallway.Editor
         [MenuItem("Tools/Endless Hallway/UI: Polish Examine UI", false, 17)]
         public static void ConfigureExamineUI()
         {
-            var canvasObj = GameObject.Find("Canvas");
-            if (canvasObj == null) canvasObj = GameObject.Find("UI_Canvas");
+            var canvasObj = GetRootCanvasObject();
             if (canvasObj == null) return;
 
             var exUI = canvasObj.GetComponent<ExamineUI>();
@@ -1549,5 +1958,703 @@ namespace EndlessHallway.Editor
             Debug.Log("[MasterBuildUtility] ExamineUI polished and connected.");
         }
         #endregion
+
+        #region 9. Pause, Settings & Accessibility UI
+        [MenuItem("Tools/Endless Hallway/UI: Build Pause & Settings Panels", false, 18)]
+        public static void BuildPauseAndSettingsUI()
+        {
+            // 1. Ensure Managers components
+            var mgrs = GameObject.Find("Managers");
+            if (mgrs == null) mgrs = new GameObject("Managers");
+
+            var settingsMgr = mgrs.GetComponent<SettingsManager>();
+            if (settingsMgr == null) settingsMgr = mgrs.AddComponent<SettingsManager>();
+
+            var pauseMgr = mgrs.GetComponent<PauseManager>();
+            if (pauseMgr == null) pauseMgr = mgrs.AddComponent<PauseManager>();
+
+            var saveMgr = mgrs.GetComponent<SaveManager>();
+            if (saveMgr == null) saveMgr = mgrs.AddComponent<SaveManager>();
+
+            EditorUtility.SetDirty(mgrs);
+
+            // 2. Ensure Player systems
+            var player = GameObject.Find("Player");
+            if (player == null)
+            {
+                var pCtrl = UnityEngine.Object.FindAnyObjectByType<PlayerController>();
+                if (pCtrl != null) player = pCtrl.gameObject;
+            }
+            if (player != null)
+            {
+                var stress = player.GetComponent<PlayerStressSystem>();
+                if (stress == null) stress = player.AddComponent<PlayerStressSystem>();
+
+                var hbClip = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/_Project/Audio/sfx_heartbeat.wav");
+                var brClip = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/_Project/Audio/sfx_breathing.wav");
+                SetField(stress, "heartbeatClip", hbClip);
+                SetField(stress, "breathingClip", brClip);
+
+                var gVol = GameObject.Find("GlobalVolume");
+                if (gVol != null) SetField(stress, "globalVolume", gVol.GetComponent<Volume>());
+
+                EditorUtility.SetDirty(stress);
+            }
+
+            // 3. Ensure Observer systems
+            var obs = GameObject.Find("ObserverEntity");
+            if (obs != null)
+            {
+                var whispers = obs.GetComponent<ProximityWhispers>();
+                if (whispers == null) whispers = obs.AddComponent<ProximityWhispers>();
+
+                var whClip = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/_Project/Audio/amb_whispers.wav");
+                SetField(whispers, "whisperClip", whClip);
+                if (player != null) SetField(whispers, "playerTransform", player.transform);
+                EditorUtility.SetDirty(whispers);
+
+                var obsCtrl = obs.GetComponent<ObserverController>();
+                if (obsCtrl != null)
+                {
+                    var jsClip = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/_Project/Audio/sfx_jumpscare.wav");
+                    var vnClip = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/_Project/Audio/sfx_observer_vanish.wav");
+                    SetField(obsCtrl, "jumpScareStingerClip", jsClip);
+                    SetField(obsCtrl, "vanishStingerClip", vnClip);
+                    EditorUtility.SetDirty(obsCtrl);
+                }
+            }
+
+            // 4. Ensure Canvas and EventSystem
+            var canvasObj = GetRootCanvasObject();
+
+            var eventSystem = UnityEngine.Object.FindAnyObjectByType<UnityEngine.EventSystems.EventSystem>();
+            if (eventSystem == null)
+            {
+                var esObj = new GameObject("EventSystem");
+                eventSystem = esObj.AddComponent<UnityEngine.EventSystems.EventSystem>();
+                esObj.AddComponent<UnityEngine.InputSystem.UI.InputSystemUIInputModule>();
+            }
+
+            // 5. Build Subtitle Panel
+            var oldSub = canvasObj.transform.Find("SubtitlePanel");
+            if (oldSub != null) UnityEngine.Object.DestroyImmediate(oldSub.gameObject);
+
+            var subPanel = new GameObject("SubtitlePanel");
+            subPanel.transform.SetParent(canvasObj.transform, false);
+            var subRect = subPanel.AddComponent<RectTransform>();
+            subRect.anchorMin = new Vector2(0.18f, 0.04f);
+            subRect.anchorMax = new Vector2(0.82f, 0.12f);
+            subRect.offsetMin = Vector2.zero;
+            subRect.offsetMax = Vector2.zero;
+            var subImg = subPanel.AddComponent<Image>();
+            subImg.color = new Color(0.04f, 0.04f, 0.05f, 0.72f);
+
+            var subTextObj = new GameObject("SubtitleText");
+            subTextObj.transform.SetParent(subPanel.transform, false);
+            var stRect = subTextObj.AddComponent<RectTransform>();
+            stRect.anchorMin = Vector2.zero;
+            stRect.anchorMax = Vector2.one;
+            stRect.offsetMin = new Vector2(16, 6);
+            stRect.offsetMax = new Vector2(-16, -6);
+            var subTmp = subTextObj.AddComponent<TextMeshProUGUI>();
+            subTmp.text = "";
+            subTmp.fontSize = 18f;
+            subTmp.color = new Color(0.96f, 0.94f, 0.86f, 1f);
+            subTmp.alignment = TextAlignmentOptions.Center;
+
+            var subUI = canvasObj.GetComponent<SubtitleUI>();
+            if (subUI == null) subUI = canvasObj.AddComponent<SubtitleUI>();
+            SetField(subUI, "subtitleRoot", subPanel);
+            SetField(subUI, "subtitleText", subTmp);
+            subPanel.SetActive(false);
+
+            // 6. Build Settings Panel first (so PauseMenuUI can reference it)
+            var oldSettings = canvasObj.transform.Find("SettingsPanel");
+            if (oldSettings != null) UnityEngine.Object.DestroyImmediate(oldSettings.gameObject);
+
+            var setPanel = new GameObject("SettingsPanel");
+            setPanel.transform.SetParent(canvasObj.transform, false);
+            var setRect = setPanel.AddComponent<RectTransform>();
+            setRect.anchorMin = new Vector2(0.12f, 0.05f);
+            setRect.anchorMax = new Vector2(0.88f, 0.95f);
+            setRect.offsetMin = Vector2.zero;
+            setRect.offsetMax = Vector2.zero;
+            var setImg = setPanel.AddComponent<Image>();
+            setImg.color = new Color(0.05f, 0.06f, 0.08f, 0.97f);
+
+            // Settings Header Title
+            var setTitle = new GameObject("Title");
+            setTitle.transform.SetParent(setPanel.transform, false);
+            var stTitleRect = setTitle.AddComponent<RectTransform>();
+            stTitleRect.anchorMin = new Vector2(0.05f, 0.88f);
+            stTitleRect.anchorMax = new Vector2(0.95f, 0.98f);
+            stTitleRect.offsetMin = Vector2.zero;
+            stTitleRect.offsetMax = Vector2.zero;
+            var setTmp = setTitle.AddComponent<TextMeshProUGUI>();
+            setTmp.text = "SETTINGS & ACCESSIBILITY";
+            setTmp.fontSize = 28f;
+            setTmp.fontStyle = FontStyles.Bold;
+            setTmp.color = new Color(0.95f, 0.92f, 0.78f, 1f);
+            setTmp.alignment = TextAlignmentOptions.Center;
+
+            // Two columns layout for Settings
+            // Left Column (Audio & Visuals)
+            var leftCol = new GameObject("LeftColumn");
+            leftCol.transform.SetParent(setPanel.transform, false);
+            var lcRect = leftCol.AddComponent<RectTransform>();
+            lcRect.anchorMin = new Vector2(0.05f, 0.15f);
+            lcRect.anchorMax = new Vector2(0.48f, 0.86f);
+            lcRect.offsetMin = Vector2.zero;
+            lcRect.offsetMax = Vector2.zero;
+            var lcLayout = leftCol.AddComponent<VerticalLayoutGroup>();
+            lcLayout.spacing = 10f;
+            lcLayout.childAlignment = TextAnchor.UpperCenter;
+            lcLayout.childControlWidth = true;
+            lcLayout.childControlHeight = false;
+            lcLayout.childForceExpandWidth = true;
+            lcLayout.childForceExpandHeight = false;
+
+            CreateSectionHeader(leftCol.transform, "AUDIO LEVELS");
+            var masterSlider = CreateSliderWidget(leftCol.transform, "MasterSlider", "MASTER VOLUME", 0f, 1f, 1.0f, out var masterVal);
+            var musicSlider = CreateSliderWidget(leftCol.transform, "MusicSlider", "MUSIC / AMBIENCE", 0f, 1f, 0.8f, out var musicVal);
+            var sfxSlider = CreateSliderWidget(leftCol.transform, "SFXSlider", "SOUND EFFECTS", 0f, 1f, 1.0f, out var sfxVal);
+
+            CreateSectionHeader(leftCol.transform, "DISPLAY & FIELD OF VIEW");
+            var brightSlider = CreateSliderWidget(leftCol.transform, "BrightnessSlider", "BRIGHTNESS", 0.2f, 2.5f, 1.0f, out var brightVal);
+            var fovSlider = CreateSliderWidget(leftCol.transform, "FOVSlider", "FIELD OF VIEW", 60f, 105f, 75f, out var fovVal);
+
+            // Right Column (Gameplay & Accessibility)
+            var rightCol = new GameObject("RightColumn");
+            rightCol.transform.SetParent(setPanel.transform, false);
+            var rcRect = rightCol.AddComponent<RectTransform>();
+            rcRect.anchorMin = new Vector2(0.52f, 0.15f);
+            rcRect.anchorMax = new Vector2(0.95f, 0.86f);
+            rcRect.offsetMin = Vector2.zero;
+            rcRect.offsetMax = Vector2.zero;
+            var rcLayout = rightCol.AddComponent<VerticalLayoutGroup>();
+            rcLayout.spacing = 10f;
+            rcLayout.childAlignment = TextAnchor.UpperCenter;
+            rcLayout.childControlWidth = true;
+            rcLayout.childControlHeight = false;
+            rcLayout.childForceExpandWidth = true;
+            rcLayout.childForceExpandHeight = false;
+
+            CreateSectionHeader(rightCol.transform, "GAMEPLAY & MOTION");
+            var shakeSlider = CreateSliderWidget(rightCol.transform, "ShakeSlider", "CAMERA SHAKE", 0f, 1.5f, 1.0f, out var shakeVal);
+            var invertToggle = CreateToggleWidget(rightCol.transform, "InvertYToggle", "INVERT Y-AXIS LOOK", false);
+
+            CreateSectionHeader(rightCol.transform, "ACCESSIBILITY AID");
+            var subToggle = CreateToggleWidget(rightCol.transform, "SubtitlesToggle", "SUBTITLES & CAPTIONS", true);
+            var photoToggle = CreateToggleWidget(rightCol.transform, "PhotoToggle", "SOFTEN JUMP SCARE FLASHES", false);
+            var colorblindToggle = CreateToggleWidget(rightCol.transform, "ColorblindToggle", "TACTILE COLORBLIND CUES", false);
+
+            // Footer Buttons
+            var footObj = new GameObject("FooterButtons");
+            footObj.transform.SetParent(setPanel.transform, false);
+            var footRect = footObj.AddComponent<RectTransform>();
+            footRect.anchorMin = new Vector2(0.05f, 0.03f);
+            footRect.anchorMax = new Vector2(0.95f, 0.12f);
+            footRect.offsetMin = Vector2.zero;
+            footRect.offsetMax = Vector2.zero;
+            var footLayout = footObj.AddComponent<HorizontalLayoutGroup>();
+            footLayout.spacing = 30f;
+            footLayout.childAlignment = TextAnchor.MiddleCenter;
+            footLayout.childControlWidth = false;
+            footLayout.childControlHeight = true;
+            footLayout.childForceExpandWidth = false;
+            footLayout.childForceExpandHeight = true;
+
+            var resetBtn = CreateButtonWidget(footObj.transform, "ResetDefaultsButton", "RESET DEFAULTS", new Vector2(260, 44));
+            var backBtn = CreateButtonWidget(footObj.transform, "BackButton", "BACK / APPLY", new Vector2(260, 44));
+
+            var settingsUI = setPanel.AddComponent<SettingsUI>();
+            SetField(settingsUI, "panelRoot", setPanel);
+            SetField(settingsUI, "masterSlider", masterSlider);
+            SetField(settingsUI, "musicSlider", musicSlider);
+            SetField(settingsUI, "sfxSlider", sfxSlider);
+            SetField(settingsUI, "masterValText", masterVal);
+            SetField(settingsUI, "musicValText", musicVal);
+            SetField(settingsUI, "sfxValText", sfxVal);
+            SetField(settingsUI, "brightnessSlider", brightSlider);
+            SetField(settingsUI, "fovSlider", fovSlider);
+            SetField(settingsUI, "brightnessValText", brightVal);
+            SetField(settingsUI, "fovValText", fovVal);
+            SetField(settingsUI, "shakeSlider", shakeSlider);
+            SetField(settingsUI, "shakeValText", shakeVal);
+            SetField(settingsUI, "invertYToggle", invertToggle);
+            SetField(settingsUI, "subtitlesToggle", subToggle);
+            SetField(settingsUI, "photosensitiveToggle", photoToggle);
+            SetField(settingsUI, "colorblindToggle", colorblindToggle);
+            SetField(settingsUI, "resetDefaultsButton", resetBtn);
+            SetField(settingsUI, "backButton", backBtn);
+            setPanel.SetActive(false);
+
+            // 7. Build Pause Menu Panel
+            var oldPause = canvasObj.transform.Find("PauseMenuPanel");
+            if (oldPause != null) UnityEngine.Object.DestroyImmediate(oldPause.gameObject);
+
+            var pausePanel = new GameObject("PauseMenuPanel");
+            pausePanel.transform.SetParent(canvasObj.transform, false);
+            var pauseRect = pausePanel.AddComponent<RectTransform>();
+            pauseRect.anchorMin = Vector2.zero;
+            pauseRect.anchorMax = Vector2.one;
+            pauseRect.offsetMin = Vector2.zero;
+            pauseRect.offsetMax = Vector2.zero;
+            var pauseImg = pausePanel.AddComponent<Image>();
+            pauseImg.color = new Color(0.04f, 0.05f, 0.07f, 0.88f);
+
+            // Pause Header
+            var pTitle = new GameObject("Title");
+            pTitle.transform.SetParent(pausePanel.transform, false);
+            var pTitleRect = pTitle.AddComponent<RectTransform>();
+            pTitleRect.anchorMin = new Vector2(0.1f, 0.72f);
+            pTitleRect.anchorMax = new Vector2(0.9f, 0.84f);
+            pTitleRect.offsetMin = Vector2.zero;
+            pTitleRect.offsetMax = Vector2.zero;
+            var pTitleTmp = pTitle.AddComponent<TextMeshProUGUI>();
+            pTitleTmp.text = "PAUSED // MARROW POINT RESIDENCES";
+            pTitleTmp.fontSize = 32f;
+            pTitleTmp.fontStyle = FontStyles.Bold;
+            pTitleTmp.color = new Color(0.96f, 0.92f, 0.78f, 1f);
+            pTitleTmp.alignment = TextAlignmentOptions.Center;
+
+            // Loop Info
+            var loopInfo = new GameObject("LoopInfo");
+            loopInfo.transform.SetParent(pausePanel.transform, false);
+            var liRect = loopInfo.AddComponent<RectTransform>();
+            liRect.anchorMin = new Vector2(0.1f, 0.65f);
+            liRect.anchorMax = new Vector2(0.9f, 0.72f);
+            liRect.offsetMin = Vector2.zero;
+            liRect.offsetMax = Vector2.zero;
+            var liTmp = loopInfo.AddComponent<TextMeshProUGUI>();
+            liTmp.text = "CORRIDOR // LOOP 0";
+            liTmp.fontSize = 17f;
+            liTmp.color = new Color(0.55f, 0.68f, 0.70f, 1f);
+            liTmp.alignment = TextAlignmentOptions.Center;
+
+            // Pause Buttons Container
+            var pBtnContainer = new GameObject("ButtonsGroup");
+            pBtnContainer.transform.SetParent(pausePanel.transform, false);
+            var pbcRect = pBtnContainer.AddComponent<RectTransform>();
+            pbcRect.anchorMin = new Vector2(0.36f, 0.16f);
+            pbcRect.anchorMax = new Vector2(0.64f, 0.60f);
+            pbcRect.offsetMin = Vector2.zero;
+            pbcRect.offsetMax = Vector2.zero;
+            var pbcLayout = pBtnContainer.AddComponent<VerticalLayoutGroup>();
+            pbcLayout.spacing = 14f;
+            pbcLayout.childAlignment = TextAnchor.MiddleCenter;
+            pbcLayout.childControlWidth = true;
+            pbcLayout.childControlHeight = true;
+            pbcLayout.childForceExpandWidth = true;
+            pbcLayout.childForceExpandHeight = false;
+
+            var resumeBtn = CreateButtonWidget(pBtnContainer.transform, "ResumeButton", "RESUME", new Vector2(320, 48));
+            var pSettingsBtn = CreateButtonWidget(pBtnContainer.transform, "SettingsButton", "SETTINGS & ACCESSIBILITY", new Vector2(320, 48));
+            var restartBtn = CreateButtonWidget(pBtnContainer.transform, "RestartLoopButton", "RESTART CURRENT LOOP", new Vector2(320, 48));
+            var quitMainMenuBtn = CreateButtonWidget(pBtnContainer.transform, "QuitMainMenuButton", "QUIT TO MAIN MENU", new Vector2(320, 48));
+            var quitBtn = CreateButtonWidget(pBtnContainer.transform, "QuitGameButton", "QUIT TO DESKTOP", new Vector2(320, 48));
+
+            var pauseUI = pausePanel.AddComponent<PauseMenuUI>();
+            SetField(pauseUI, "pausePanel", pausePanel);
+            SetField(pauseUI, "settingsPanel", settingsUI);
+            SetField(pauseUI, "resumeButton", resumeBtn);
+            SetField(pauseUI, "settingsButton", pSettingsBtn);
+            SetField(pauseUI, "restartLoopButton", restartBtn);
+            SetField(pauseUI, "quitMainMenuButton", quitMainMenuBtn);
+            SetField(pauseUI, "quitGameButton", quitBtn);
+            SetField(pauseUI, "loopInfoText", liTmp);
+            pausePanel.SetActive(false);
+
+            EditorUtility.SetDirty(canvasObj);
+            Debug.Log("[MasterBuildUtility] Pause Menu, Settings Panel, and Subtitles built and wired.");
+        }
+
+        [MenuItem("Tools/Endless Hallway/UI: Build Main Menu Panel", false, 19)]
+        public static void BuildMainMenuUI()
+        {
+            var canvasObj = GetRootCanvasObject();
+            if (canvasObj == null) return;
+
+            var settingsUI = canvasObj.GetComponentInChildren<SettingsUI>(true);
+
+            // 1. Build or rebuild MainMenuPanel
+            var oldMenu = canvasObj.transform.Find("MainMenuPanel");
+            if (oldMenu != null) UnityEngine.Object.DestroyImmediate(oldMenu.gameObject);
+
+            var menuPanel = new GameObject("MainMenuPanel");
+            menuPanel.transform.SetParent(canvasObj.transform, false);
+            var menuRect = menuPanel.AddComponent<RectTransform>();
+            menuRect.anchorMin = Vector2.zero;
+            menuRect.anchorMax = Vector2.one;
+            menuRect.offsetMin = Vector2.zero;
+            menuRect.offsetMax = Vector2.zero;
+
+            var menuBg = menuPanel.AddComponent<Image>();
+            menuBg.color = new Color(0.04f, 0.05f, 0.07f, 0.96f);
+
+            // Title
+            var titleObj = new GameObject("Title");
+            titleObj.transform.SetParent(menuPanel.transform, false);
+            var titleRect = titleObj.AddComponent<RectTransform>();
+            titleRect.anchorMin = new Vector2(0.1f, 0.68f);
+            titleRect.anchorMax = new Vector2(0.9f, 0.86f);
+            titleRect.offsetMin = Vector2.zero;
+            titleRect.offsetMax = Vector2.zero;
+            var titleTmp = titleObj.AddComponent<TextMeshProUGUI>();
+            titleTmp.text = "THE ENDLESS HALLWAY";
+            titleTmp.fontSize = 44f;
+            titleTmp.fontStyle = FontStyles.Bold;
+            titleTmp.color = new Color(0.96f, 0.92f, 0.78f, 1f);
+            titleTmp.alignment = TextAlignmentOptions.Center;
+
+            // Subtitle
+            var subObj = new GameObject("Subtitle");
+            subObj.transform.SetParent(menuPanel.transform, false);
+            var subRect = subObj.AddComponent<RectTransform>();
+            subRect.anchorMin = new Vector2(0.1f, 0.62f);
+            subRect.anchorMax = new Vector2(0.9f, 0.68f);
+            subRect.offsetMin = Vector2.zero;
+            subRect.offsetMax = Vector2.zero;
+            var subTmp = subObj.AddComponent<TextMeshProUGUI>();
+            subTmp.text = "MARROW POINT RESIDENCES // APARTMENT 214 INQUEST";
+            subTmp.fontSize = 16f;
+            subTmp.color = new Color(0.55f, 0.68f, 0.70f, 1f);
+            subTmp.alignment = TextAlignmentOptions.Center;
+
+            // Button Container
+            var btnContainer = new GameObject("ButtonsGroup");
+            btnContainer.transform.SetParent(menuPanel.transform, false);
+            var bcRect = btnContainer.AddComponent<RectTransform>();
+            bcRect.anchorMin = new Vector2(0.35f, 0.12f);
+            bcRect.anchorMax = new Vector2(0.65f, 0.58f);
+            bcRect.offsetMin = Vector2.zero;
+            bcRect.offsetMax = Vector2.zero;
+            var bcLayout = btnContainer.AddComponent<VerticalLayoutGroup>();
+            bcLayout.spacing = 14f;
+            bcLayout.childAlignment = TextAnchor.MiddleCenter;
+            bcLayout.childControlWidth = true;
+            bcLayout.childControlHeight = true;
+            bcLayout.childForceExpandWidth = true;
+            bcLayout.childForceExpandHeight = false;
+
+            var contBtn = CreateButtonWidget(btnContainer.transform, "ContinueButton", "CONTINUE", new Vector2(340, 48));
+            var newGameBtn = CreateButtonWidget(btnContainer.transform, "NewGameButton", "NEW GAME", new Vector2(340, 48));
+            var settBtn = CreateButtonWidget(btnContainer.transform, "SettingsButton", "SETTINGS & ACCESSIBILITY", new Vector2(340, 48));
+            var credBtn = CreateButtonWidget(btnContainer.transform, "CreditsButton", "CREDITS", new Vector2(340, 48));
+            var quitBtn = CreateButtonWidget(btnContainer.transform, "QuitButton", "QUIT TO DESKTOP", new Vector2(340, 48));
+
+            // 2. Build Credits Panel
+            var oldCredits = canvasObj.transform.Find("CreditsPanel");
+            if (oldCredits != null) UnityEngine.Object.DestroyImmediate(oldCredits.gameObject);
+
+            var credPanel = new GameObject("CreditsPanel");
+            credPanel.transform.SetParent(canvasObj.transform, false);
+            var cpRect = credPanel.AddComponent<RectTransform>();
+            cpRect.anchorMin = new Vector2(0.2f, 0.15f);
+            cpRect.anchorMax = new Vector2(0.8f, 0.85f);
+            cpRect.offsetMin = Vector2.zero;
+            cpRect.offsetMax = Vector2.zero;
+            var cpBg = credPanel.AddComponent<Image>();
+            cpBg.color = new Color(0.06f, 0.07f, 0.10f, 0.98f);
+
+            var cpTitleObj = new GameObject("CreditsTitle");
+            cpTitleObj.transform.SetParent(credPanel.transform, false);
+            var cptRect = cpTitleObj.AddComponent<RectTransform>();
+            cptRect.anchorMin = new Vector2(0.05f, 0.85f);
+            cptRect.anchorMax = new Vector2(0.95f, 0.95f);
+            cptRect.offsetMin = Vector2.zero;
+            cptRect.offsetMax = Vector2.zero;
+            var cptTmp = cpTitleObj.AddComponent<TextMeshProUGUI>();
+            cptTmp.text = "THE ENDLESS HALLWAY // PRODUCTION LOG";
+            cptTmp.fontSize = 24f;
+            cptTmp.fontStyle = FontStyles.Bold;
+            cptTmp.color = new Color(0.96f, 0.92f, 0.78f, 1f);
+            cptTmp.alignment = TextAlignmentOptions.Center;
+
+            var cpContentObj = new GameObject("CreditsContent");
+            cpContentObj.transform.SetParent(credPanel.transform, false);
+            var cpcRect = cpContentObj.AddComponent<RectTransform>();
+            cpcRect.anchorMin = new Vector2(0.1f, 0.22f);
+            cpcRect.anchorMax = new Vector2(0.9f, 0.82f);
+            cpcRect.offsetMin = Vector2.zero;
+            cpcRect.offsetMax = Vector2.zero;
+            var cpcTmp = cpContentObj.AddComponent<TextMeshProUGUI>();
+            cpcTmp.text = "<b>EXPERIENCE DESIGN & ARCHITECTURE</b>\nLiminal Psychological Horror Build v2.0\n\n<b>ENVIRONMENT & LEVEL DESIGN</b>\nMarrow Point 2nd Floor Corridor & Suite 214\nRoom 210, 212, 214, 216 & Stairwell Landing\n\n<b>AUDIO DIRECTION</b>\nProcedural Telephony, Physiological Stress Audio & Ambience Engine\n\n<b>ENGINE</b>\nUnity 6 & Universal Render Pipeline (URP)";
+            cpcTmp.fontSize = 17f;
+            cpcTmp.color = new Color(0.85f, 0.85f, 0.82f, 1f);
+            cpcTmp.alignment = TextAlignmentOptions.Center;
+
+            var closeCredBtn = CreateButtonWidget(credPanel.transform, "CloseCreditsButton", "CLOSE", new Vector2(240, 44));
+            var ccbRect = closeCredBtn.GetComponent<RectTransform>();
+            ccbRect.anchorMin = new Vector2(0.35f, 0.05f);
+            ccbRect.anchorMax = new Vector2(0.65f, 0.15f);
+            ccbRect.offsetMin = Vector2.zero;
+            ccbRect.offsetMax = Vector2.zero;
+
+            credPanel.SetActive(false);
+
+            // 3. Configure MainMenuUI component
+            var mainMenuUI = canvasObj.GetComponent<MainMenuUI>();
+            if (mainMenuUI == null) mainMenuUI = canvasObj.AddComponent<MainMenuUI>();
+
+            SetField(mainMenuUI, "menuPanel", menuPanel);
+            SetField(mainMenuUI, "creditsPanel", credPanel);
+            SetField(mainMenuUI, "settingsPanel", settingsUI);
+            SetField(mainMenuUI, "continueButton", contBtn);
+            SetField(mainMenuUI, "newGameButton", newGameBtn);
+            SetField(mainMenuUI, "settingsButton", settBtn);
+            SetField(mainMenuUI, "creditsButton", credBtn);
+            SetField(mainMenuUI, "closeCreditsButton", closeCredBtn);
+            SetField(mainMenuUI, "quitButton", quitBtn);
+
+            var whClip = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/_Project/Audio/amb_whispers.wav");
+            SetField(mainMenuUI, "menuMusicClip", whClip);
+
+            menuPanel.SetActive(true);
+
+            EditorUtility.SetDirty(canvasObj);
+            EditorUtility.SetDirty(mainMenuUI);
+            Debug.Log("[MasterBuildUtility] Main Menu & Credits Panel successfully built and wired!");
+        }
+
+        private static void CreateSectionHeader(Transform parent, string title)
+        {
+            var obj = new GameObject("Header_" + title);
+            obj.transform.SetParent(parent, false);
+            var rect = obj.AddComponent<RectTransform>();
+            rect.sizeDelta = new Vector2(480, 28);
+            var tmp = obj.AddComponent<TextMeshProUGUI>();
+            tmp.text = title;
+            tmp.fontSize = 13f;
+            tmp.fontStyle = FontStyles.Bold;
+            tmp.color = new Color(0.88f, 0.72f, 0.35f, 0.95f); // amber accent
+            tmp.alignment = TextAlignmentOptions.BottomLeft;
+        }
+
+        private static Slider CreateSliderWidget(Transform parent, string name, string labelText, float min, float max, float defVal, out TextMeshProUGUI outValText)
+        {
+            var container = new GameObject(name);
+            container.transform.SetParent(parent, false);
+            var cr = container.AddComponent<RectTransform>();
+            cr.sizeDelta = new Vector2(480, 36);
+
+            var lblObj = new GameObject("Label");
+            lblObj.transform.SetParent(container.transform, false);
+            var lblRect = lblObj.AddComponent<RectTransform>();
+            lblRect.anchorMin = new Vector2(0f, 0f);
+            lblRect.anchorMax = new Vector2(0.42f, 1f);
+            lblRect.offsetMin = Vector2.zero;
+            lblRect.offsetMax = Vector2.zero;
+            var lblTmp = lblObj.AddComponent<TextMeshProUGUI>();
+            lblTmp.text = labelText;
+            lblTmp.fontSize = 15f;
+            lblTmp.color = new Color(0.85f, 0.85f, 0.82f);
+            lblTmp.alignment = TextAlignmentOptions.MidlineLeft;
+
+            var sliderObj = new GameObject("Slider");
+            sliderObj.transform.SetParent(container.transform, false);
+            var sRect = sliderObj.AddComponent<RectTransform>();
+            sRect.anchorMin = new Vector2(0.44f, 0.25f);
+            sRect.anchorMax = new Vector2(0.82f, 0.75f);
+            sRect.offsetMin = Vector2.zero;
+            sRect.offsetMax = Vector2.zero;
+
+            var bgObj = new GameObject("Background");
+            bgObj.transform.SetParent(sliderObj.transform, false);
+            var bgRect = bgObj.AddComponent<RectTransform>();
+            bgRect.anchorMin = Vector2.zero;
+            bgRect.anchorMax = Vector2.one;
+            bgRect.offsetMin = Vector2.zero;
+            bgRect.offsetMax = Vector2.zero;
+            var bgImg = bgObj.AddComponent<Image>();
+            bgImg.color = new Color(0.18f, 0.22f, 0.26f);
+
+            var fillArea = new GameObject("Fill Area");
+            fillArea.transform.SetParent(sliderObj.transform, false);
+            var faRect = fillArea.AddComponent<RectTransform>();
+            faRect.anchorMin = Vector2.zero;
+            faRect.anchorMax = Vector2.one;
+            faRect.offsetMin = Vector2.zero;
+            faRect.offsetMax = Vector2.zero;
+
+            var fillObj = new GameObject("Fill");
+            fillObj.transform.SetParent(fillArea.transform, false);
+            var fillRect = fillObj.AddComponent<RectTransform>();
+            fillRect.anchorMin = Vector2.zero;
+            fillRect.anchorMax = Vector2.one;
+            fillRect.offsetMin = Vector2.zero;
+            fillRect.offsetMax = Vector2.zero;
+            var fillImg = fillObj.AddComponent<Image>();
+            fillImg.color = new Color(0.88f, 0.72f, 0.35f);
+
+            var handleArea = new GameObject("Handle Slide Area");
+            handleArea.transform.SetParent(sliderObj.transform, false);
+            var haRect = handleArea.AddComponent<RectTransform>();
+            haRect.anchorMin = Vector2.zero;
+            haRect.anchorMax = Vector2.one;
+            haRect.offsetMin = Vector2.zero;
+            haRect.offsetMax = Vector2.zero;
+
+            var handleObj = new GameObject("Handle");
+            handleObj.transform.SetParent(handleArea.transform, false);
+            var handleRect = handleObj.AddComponent<RectTransform>();
+            handleRect.sizeDelta = new Vector2(16, 24);
+            var handleImg = handleObj.AddComponent<Image>();
+            handleImg.color = new Color(0.95f, 0.95f, 0.95f);
+
+            var slider = sliderObj.AddComponent<Slider>();
+            slider.fillRect = fillRect;
+            slider.handleRect = handleRect;
+            slider.targetGraphic = handleImg;
+            slider.minValue = min;
+            slider.maxValue = max;
+            slider.value = defVal;
+
+            var valObj = new GameObject("ValueText");
+            valObj.transform.SetParent(container.transform, false);
+            var valRect = valObj.AddComponent<RectTransform>();
+            valRect.anchorMin = new Vector2(0.84f, 0f);
+            valRect.anchorMax = new Vector2(1.0f, 1f);
+            valRect.offsetMin = Vector2.zero;
+            valRect.offsetMax = Vector2.zero;
+            var valTmp = valObj.AddComponent<TextMeshProUGUI>();
+            valTmp.fontSize = 14f;
+            valTmp.color = new Color(0.90f, 0.85f, 0.65f);
+            valTmp.alignment = TextAlignmentOptions.MidlineRight;
+            valTmp.text = $"{defVal}";
+            outValText = valTmp;
+
+            return slider;
+        }
+
+        private static Toggle CreateToggleWidget(Transform parent, string name, string labelText, bool defVal)
+        {
+            var container = new GameObject(name);
+            container.transform.SetParent(parent, false);
+            var cr = container.AddComponent<RectTransform>();
+            cr.sizeDelta = new Vector2(480, 36);
+
+            var lblObj = new GameObject("Label");
+            lblObj.transform.SetParent(container.transform, false);
+            var lblRect = lblObj.AddComponent<RectTransform>();
+            lblRect.anchorMin = new Vector2(0f, 0f);
+            lblRect.anchorMax = new Vector2(0.85f, 1f);
+            lblRect.offsetMin = Vector2.zero;
+            lblRect.offsetMax = Vector2.zero;
+            var lblTmp = lblObj.AddComponent<TextMeshProUGUI>();
+            lblTmp.text = labelText;
+            lblTmp.fontSize = 15f;
+            lblTmp.color = new Color(0.85f, 0.85f, 0.82f);
+            lblTmp.alignment = TextAlignmentOptions.MidlineLeft;
+
+            var boxObj = new GameObject("Background");
+            boxObj.transform.SetParent(container.transform, false);
+            var boxRect = boxObj.AddComponent<RectTransform>();
+            boxRect.anchorMin = new Vector2(0.90f, 0.15f);
+            boxRect.anchorMax = new Vector2(0.98f, 0.85f);
+            boxRect.offsetMin = Vector2.zero;
+            boxRect.offsetMax = Vector2.zero;
+            var boxImg = boxObj.AddComponent<Image>();
+            boxImg.color = new Color(0.18f, 0.22f, 0.26f);
+
+            var chkObj = new GameObject("Checkmark");
+            chkObj.transform.SetParent(boxObj.transform, false);
+            var chkRect = chkObj.AddComponent<RectTransform>();
+            chkRect.anchorMin = new Vector2(0.2f, 0.2f);
+            chkRect.anchorMax = new Vector2(0.8f, 0.8f);
+            chkRect.offsetMin = Vector2.zero;
+            chkRect.offsetMax = Vector2.zero;
+            var chkImg = chkObj.AddComponent<Image>();
+            chkImg.color = new Color(0.88f, 0.72f, 0.35f);
+
+            var toggle = container.AddComponent<Toggle>();
+            toggle.targetGraphic = boxImg;
+            toggle.graphic = chkImg;
+            toggle.isOn = defVal;
+
+            return toggle;
+        }
+
+        private static Button CreateButtonWidget(Transform parent, string name, string labelText, Vector2 size)
+        {
+            var btnObj = new GameObject(name);
+            btnObj.transform.SetParent(parent, false);
+            var rect = btnObj.AddComponent<RectTransform>();
+            rect.sizeDelta = size;
+
+            var img = btnObj.AddComponent<Image>();
+            img.color = new Color(0.14f, 0.18f, 0.22f, 1f);
+
+            var btn = btnObj.AddComponent<Button>();
+            var colors = btn.colors;
+            colors.normalColor = new Color(0.14f, 0.18f, 0.22f, 1f);
+            colors.highlightedColor = new Color(0.28f, 0.35f, 0.40f, 1f);
+            colors.pressedColor = new Color(0.08f, 0.10f, 0.12f, 1f);
+            colors.selectedColor = new Color(0.22f, 0.28f, 0.32f, 1f);
+            btn.colors = colors;
+
+            var txtObj = new GameObject("Text");
+            txtObj.transform.SetParent(btnObj.transform, false);
+            var txtRect = txtObj.AddComponent<RectTransform>();
+            txtRect.anchorMin = Vector2.zero;
+            txtRect.anchorMax = Vector2.one;
+            txtRect.offsetMin = Vector2.zero;
+            txtRect.offsetMax = Vector2.zero;
+
+            var tmp = txtObj.AddComponent<TextMeshProUGUI>();
+            tmp.text = labelText;
+            tmp.fontSize = 16f;
+            tmp.fontStyle = FontStyles.Bold;
+            tmp.color = new Color(0.92f, 0.90f, 0.84f, 1f);
+            tmp.alignment = TextAlignmentOptions.Center;
+
+            return btn;
+        }
+
+        private static GameObject GetRootCanvasObject()
+        {
+            var canvases = UnityEngine.Object.FindObjectsByType<UnityEngine.Canvas>(UnityEngine.FindObjectsInactive.Include, UnityEngine.FindObjectsSortMode.None);
+            foreach (var c in canvases)
+            {
+                if (c.transform.parent == null) return c.gameObject;
+            }
+            var root = GameObject.Find("Canvas");
+            if (root != null && root.transform.parent == null) return root;
+
+            var newCanvas = new GameObject("Canvas");
+            var cv = newCanvas.AddComponent<Canvas>();
+            cv.renderMode = RenderMode.ScreenSpaceOverlay;
+            var cs = newCanvas.AddComponent<CanvasScaler>();
+            cs.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+            cs.referenceResolution = new Vector2(1920, 1080);
+            newCanvas.AddComponent<GraphicRaycaster>();
+            return newCanvas;
+        }
+
+        private static void SetField(object target, string fieldName, object value)
+        {
+            if (target == null) return;
+            var field = target.GetType().GetField(fieldName, System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
+            if (field != null) field.SetValue(target, value);
+        }
+        #endregion
+    }
+
+    [InitializeOnLoad]
+    public static class AutoBuildRunner
+    {
+        static AutoBuildRunner()
+        {
+            EditorApplication.delayCall += () =>
+            {
+                string flagPath = Application.dataPath + "/../Temp/AutoBuildRan_v2.flag";
+                if (!File.Exists(flagPath))
+                {
+                    File.WriteAllText(flagPath, DateTime.UtcNow.ToString());
+                    Debug.Log("[AutoBuildRunner] Automatically triggering RunMasterBuild via InitializeOnLoad!");
+                    MasterBuildUtility.RunMasterBuild();
+                }
+            };
+        }
     }
 }
