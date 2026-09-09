@@ -170,8 +170,8 @@ namespace EndlessHallway.Anomaly
                     // Check door registry or find in scene
                     if (doorRegistry.TryGetValue(anomaly.targetObjectId, out DoorController door))
                     {
-                        door.SetLocked(anomaly.setDoorLocked);
-                        if (anomaly.setDoorOpen) door.SetOpen(true);
+                        door.SetLockedImmediate(anomaly.setDoorLocked);
+                        if (anomaly.setDoorOpen) door.SetOpenImmediate(true);
                     }
                     else
                     {
@@ -182,8 +182,8 @@ namespace EndlessHallway.Anomaly
                             if (d.DoorId == anomaly.targetObjectId)
                             {
                                 doorRegistry[d.DoorId] = d;
-                                d.SetLocked(anomaly.setDoorLocked);
-                                if (anomaly.setDoorOpen) d.SetOpen(true);
+                                d.SetLockedImmediate(anomaly.setDoorLocked);
+                                if (anomaly.setDoorOpen) d.SetOpenImmediate(true);
                                 break;
                             }
                         }

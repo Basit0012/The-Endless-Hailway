@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4fb275bb01d544f4b8a51952f770a580, type: 3}
+  m_Name: Anom_Observer_Aggressive
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessHallway.Anomaly.AnomalyDefinitionSO
+  anomalyId: Anom_Observer_Aggressive
+  description: Observer stalks aggressively down the corridor if the player looks
+    away or lingers.
+  targetObjectId: ObserverEntity
+  anomalyType: 7
+  positionOffset: {x: 0, y: 0, z: 0}
+  rotationOffset: {x: 0, y: 0, z: 0}
+  activeState: 1
+  targetMaterial: {fileID: 0}
+  isLightFlickering: 1
+  flickerIntervalMin: 0.05
+  flickerIntervalMax: 0.25
+  lightColor: {r: 1, g: 1, b: 1, a: 1}
+  setDoorLocked: 1
+  setDoorOpen: 0
+  audioClip: {fileID: 0}
+  loopAudio: 0
+  audioVolume: 1
+  volumeProfile: {fileID: 0}
+  observerSpawnPointId: FarHallway
+  observerState: 4

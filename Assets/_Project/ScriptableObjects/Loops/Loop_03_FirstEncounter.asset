@@ -20,3 +20,4 @@ MonoBehaviour:
   activeAnomalies:
   - {fileID: 11400000, guid: 8b98d64d890917746ba3cd533fd0c677, type: 2}
   - {fileID: 11400000, guid: 8a2e2668e4b056849a87a78a6136a844, type: 2}
+  - {fileID: 11400000, guid: d4444444444444444444444444444402, type: 2}

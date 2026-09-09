@@ -43,6 +43,14 @@ namespace EndlessHallway.Anomaly
             baselineActive = gameObject.activeSelf;
 
             cachedRenderer = GetComponent<Renderer>();
+            if (cachedRenderer == null)
+            {
+                var quadChild = transform.Find("PaintingQuad");
+                if (quadChild == null) quadChild = transform.Find("Canvas");
+                if (quadChild != null) cachedRenderer = quadChild.GetComponent<Renderer>();
+                else cachedRenderer = GetComponentInChildren<Renderer>();
+            }
+
             if (cachedRenderer != null)
             {
                 baselineMaterial = cachedRenderer.sharedMaterial;
@@ -98,7 +106,7 @@ namespace EndlessHallway.Anomaly
                 case AnomalyType.MaterialSwap:
                     if (cachedRenderer != null && anomaly.targetMaterial != null)
                     {
-                        cachedRenderer.material = anomaly.targetMaterial;
+                        cachedRenderer.sharedMaterial = anomaly.targetMaterial;
                     }
                     break;
 
@@ -128,6 +136,23 @@ namespace EndlessHallway.Anomaly
                         cachedAudioSource.loop = anomaly.loopAudio;
                         cachedAudioSource.volume = anomaly.audioVolume;
                         cachedAudioSource.Play();
+
+                        if (UI.SubtitleUI.Instance != null && anomaly.audioClip != null)
+                        {
+                            string clipName = anomaly.audioClip.name.ToLower();
+                            if (clipName.Contains("ring"))
+                            {
+                                UI.SubtitleUI.Instance.ShowSubtitle("[Telephone rings continuously inside Room 214]", 4.0f);
+                            }
+                            else if (clipName.Contains("call"))
+                            {
+                                UI.SubtitleUI.Instance.ShowSubtitle("[Distorted telephone voice] \"...Aiden?... 214 isn't responding... the smoke dampers are jammed...\"", 7.0f);
+                            }
+                            else
+                            {
+                                UI.SubtitleUI.Instance.ShowSubtitle($"[{anomaly.description}]", 3.5f);
+                            }
+                        }
                     }
                     break;
             }
@@ -158,7 +183,7 @@ namespace EndlessHallway.Anomaly
 
             if (cachedRenderer != null && baselineMaterial != null)
             {
-                cachedRenderer.material = baselineMaterial;
+                cachedRenderer.sharedMaterial = baselineMaterial;
             }
 
             if (cachedLight != null)
