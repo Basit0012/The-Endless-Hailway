@@ -91,13 +91,20 @@ namespace EndlessHallway.UI
                 newGameButton.Select();
             }
 
-            Cursor.lockState = CursorLockMode.None;
-            Cursor.visible = true;
+            if (GameManager.Instance != null)
+            {
+                GameManager.Instance.SetState(GameState.MainMenu);
+            }
+            else
+            {
+                Cursor.lockState = CursorLockMode.None;
+                Cursor.visible = true;
 
-            var pCtrl = FindAnyObjectByType<Player.PlayerController>();
-            var pLook = FindAnyObjectByType<Player.PlayerCameraLook>();
-            if (pCtrl != null) pCtrl.CanMove = false;
-            if (pLook != null) pLook.CanLook = false;
+                var pCtrl = FindAnyObjectByType<Player.PlayerController>();
+                var pLook = FindAnyObjectByType<Player.PlayerCameraLook>();
+                if (pCtrl != null) pCtrl.CanMove = false;
+                if (pLook != null) pLook.CanLook = false;
+            }
         }
 
         public void HideMenu()
@@ -112,13 +119,20 @@ namespace EndlessHallway.UI
             if (creditsPanel != null) creditsPanel.SetActive(false);
             if (settingsPanel != null) settingsPanel.Close();
 
-            Cursor.lockState = CursorLockMode.Locked;
-            Cursor.visible = false;
+            if (GameManager.Instance != null)
+            {
+                GameManager.Instance.SetState(GameState.Exploring);
+            }
+            else
+            {
+                Cursor.lockState = CursorLockMode.Locked;
+                Cursor.visible = false;
 
-            var pCtrl = FindAnyObjectByType<Player.PlayerController>();
-            var pLook = FindAnyObjectByType<Player.PlayerCameraLook>();
-            if (pCtrl != null) pCtrl.CanMove = true;
-            if (pLook != null) pLook.CanLook = true;
+                var pCtrl = FindAnyObjectByType<Player.PlayerController>();
+                var pLook = FindAnyObjectByType<Player.PlayerCameraLook>();
+                if (pCtrl != null) pCtrl.CanMove = true;
+                if (pLook != null) pLook.CanLook = true;
+            }
         }
 
         public void RefreshContinueButton()
