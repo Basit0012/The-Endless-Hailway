@@ -62,33 +62,53 @@ namespace EndlessHallway.Player
                 ApplySettings();
             }
 
-            // Sync with GameManager state rather than blindly locking
             if (Core.GameManager.Instance != null)
             {
-                if (Core.GameManager.Instance.CurrentState == Core.GameState.Exploring)
-                {
-                    LockCursor();
-                    canLook = true;
-                }
-                else
-                {
-                    UnlockCursor();
-                    canLook = false;
-                }
+                Core.GameManager.Instance.OnStateChanged += HandleGameStateChanged;
+            }
+
+            // Sync with GameManager state rather than blindly locking
+            ApplyStateCursor();
+        }
+
+        private void HandleGameStateChanged(Core.GameState newState)
+        {
+            ApplyStateCursor();
+        }
+
+        private bool IsGameplayActive()
+        {
+            if (Core.GameManager.Instance != null)
+            {
+                return Core.GameManager.Instance.CurrentState == Core.GameState.Exploring;
+            }
+
+            var mainMenu = FindAnyObjectByType<UI.MainMenuUI>(FindObjectsInactive.Include);
+            if (mainMenu != null && mainMenu.gameObject.activeInHierarchy)
+            {
+                return false;
+            }
+
+            var uim = FindAnyObjectByType<UI.UIManager>(FindObjectsInactive.Include);
+            if (uim != null && uim.IsAnyModalOpen)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        private void ApplyStateCursor()
+        {
+            if (IsGameplayActive())
+            {
+                LockCursor();
+                canLook = true;
             }
             else
             {
-                var mainMenu = FindAnyObjectByType<UI.MainMenuUI>(FindObjectsInactive.Include);
-                if (mainMenu != null && mainMenu.gameObject.activeInHierarchy)
-                {
-                    UnlockCursor();
-                    canLook = false;
-                }
-                else
-                {
-                    LockCursor();
-                    canLook = true;
-                }
+                UnlockCursor();
+                canLook = false;
             }
         }
 
@@ -96,16 +116,13 @@ namespace EndlessHallway.Player
         {
             if (!hasFocus) return;
 
-            if (Core.GameManager.Instance != null)
+            if (IsGameplayActive())
             {
-                if (Core.GameManager.Instance.CurrentState == Core.GameState.Exploring)
-                {
-                    LockCursor();
-                }
-                else
-                {
-                    UnlockCursor();
-                }
+                LockCursor();
+            }
+            else
+            {
+                UnlockCursor();
             }
         }
 
@@ -114,6 +131,10 @@ namespace EndlessHallway.Player
             if (Core.SettingsManager.Instance != null)
             {
                 Core.SettingsManager.Instance.OnSettingsChanged -= HandleSettingsChanged;
+            }
+            if (Core.GameManager.Instance != null)
+            {
+                Core.GameManager.Instance.OnStateChanged -= HandleGameStateChanged;
             }
         }
 
@@ -132,6 +153,16 @@ namespace EndlessHallway.Player
 
         private void Update()
         {
+            if (!IsGameplayActive())
+            {
+                canLook = false;
+                if (Cursor.lockState != CursorLockMode.None || !Cursor.visible)
+                {
+                    UnlockCursor();
+                }
+                return;
+            }
+
             if (!canLook) return;
 
             Vector2 lookInput = ReadLookInput();
@@ -178,6 +209,12 @@ namespace EndlessHallway.Player
 
         public void LockCursor()
         {
+            if (!IsGameplayActive())
+            {
+                UnlockCursor();
+                return;
+            }
+
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
         }

@@ -509,6 +509,7 @@ namespace EndlessHallway.Editor
 
             // 8. Player Setup
             GameObject playerObj = new GameObject("Player");
+            playerObj.tag = "Player";
             playerObj.transform.position = new Vector3(0f, 1.0f, 1.2f);
             playerObj.transform.rotation = Quaternion.identity;
 
@@ -524,9 +525,34 @@ namespace EndlessHallway.Editor
                 if (stepField != null) stepField.SetValue(pc, new AudioClip[] { footstepClip });
             }
 
+            // Adventure_Character model attachment
+            var charPrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Adventure_Character/Prefabs/Man_03.prefab");
+            if (charPrefab != null)
+            {
+                var charInstance = (GameObject)PrefabUtility.InstantiatePrefab(charPrefab, playerObj.transform);
+                charInstance.name = "Adventure_Character";
+                charInstance.transform.localPosition = new Vector3(0f, -0.9f, 0f);
+                charInstance.transform.localRotation = Quaternion.identity;
+
+                foreach (var smr in charInstance.GetComponentsInChildren<SkinnedMeshRenderer>(true))
+                {
+                    string n = smr.gameObject.name.ToLower();
+                    if (n.Contains("head") || n.Contains("eyes") || n.Contains("jaw") || n.Contains("face") || n.Contains("balaclava"))
+                    {
+                        smr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.ShadowsOnly;
+                    }
+                }
+
+                var modelField = typeof(PlayerController).GetField("characterModel", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                if (modelField != null) modelField.SetValue(pc, charInstance);
+
+                var animField = typeof(PlayerController).GetField("characterAnimator", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                if (animField != null) animField.SetValue(pc, charInstance.GetComponent<Animator>());
+            }
+
             GameObject camHolder = new GameObject("CameraHolder");
             camHolder.transform.SetParent(playerObj.transform);
-            camHolder.transform.localPosition = new Vector3(0f, 0.7f, 0f);
+            camHolder.transform.localPosition = new Vector3(0f, 0.82f, 0.06f);
 
             var camHolderField = typeof(PlayerController).GetField("cameraHolder", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
             if (camHolderField != null) camHolderField.SetValue(pc, camHolder.transform);
@@ -537,7 +563,7 @@ namespace EndlessHallway.Editor
             camObj.transform.localPosition = Vector3.zero;
             camObj.transform.localRotation = Quaternion.identity;
             Camera cam = camObj.AddComponent<Camera>();
-            cam.nearClipPlane = 0.1f;
+            cam.nearClipPlane = 0.05f;
             camObj.AddComponent<AudioListener>();
 
             PlayerCameraLook look = playerObj.AddComponent<PlayerCameraLook>();

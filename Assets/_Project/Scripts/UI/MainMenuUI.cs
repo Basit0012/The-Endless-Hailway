@@ -47,6 +47,28 @@ namespace EndlessHallway.UI
             Instance = this;
 
             HookButtons();
+            EnsureCursorUnlocked();
+        }
+
+        private void OnEnable()
+        {
+            EnsureCursorUnlocked();
+        }
+
+        public void EnsureCursorUnlocked()
+        {
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+
+            var pCtrl = FindAnyObjectByType<Player.PlayerController>();
+            var pLook = FindAnyObjectByType<Player.PlayerCameraLook>();
+            if (pCtrl != null) pCtrl.CanMove = false;
+            if (pLook != null) pLook.CanLook = false;
+
+            if (GameManager.Instance != null && GameManager.Instance.CurrentState != GameState.MainMenu)
+            {
+                GameManager.Instance.SetState(GameState.MainMenu);
+            }
         }
 
         private void Start()
@@ -56,16 +78,41 @@ namespace EndlessHallway.UI
             {
                 ShowMenu();
             }
+            EnsureCursorUnlocked();
         }
 
         private void HookButtons()
         {
-            if (continueButton != null) continueButton.onClick.AddListener(OnContinueClicked);
-            if (newGameButton != null) newGameButton.onClick.AddListener(OnNewGameClicked);
-            if (settingsButton != null) settingsButton.onClick.AddListener(OnSettingsClicked);
-            if (creditsButton != null) creditsButton.onClick.AddListener(OnCreditsClicked);
-            if (closeCreditsButton != null) closeCreditsButton.onClick.AddListener(OnCloseCreditsClicked);
-            if (quitButton != null) quitButton.onClick.AddListener(OnQuitClicked);
+            if (continueButton != null)
+            {
+                continueButton.onClick.RemoveListener(OnContinueClicked);
+                continueButton.onClick.AddListener(OnContinueClicked);
+            }
+            if (newGameButton != null)
+            {
+                newGameButton.onClick.RemoveListener(OnNewGameClicked);
+                newGameButton.onClick.AddListener(OnNewGameClicked);
+            }
+            if (settingsButton != null)
+            {
+                settingsButton.onClick.RemoveListener(OnSettingsClicked);
+                settingsButton.onClick.AddListener(OnSettingsClicked);
+            }
+            if (creditsButton != null)
+            {
+                creditsButton.onClick.RemoveListener(OnCreditsClicked);
+                creditsButton.onClick.AddListener(OnCreditsClicked);
+            }
+            if (closeCreditsButton != null)
+            {
+                closeCreditsButton.onClick.RemoveListener(OnCloseCreditsClicked);
+                closeCreditsButton.onClick.AddListener(OnCloseCreditsClicked);
+            }
+            if (quitButton != null)
+            {
+                quitButton.onClick.RemoveListener(OnQuitClicked);
+                quitButton.onClick.AddListener(OnQuitClicked);
+            }
         }
 
         public void ShowMenu()
@@ -91,20 +138,7 @@ namespace EndlessHallway.UI
                 newGameButton.Select();
             }
 
-            if (GameManager.Instance != null)
-            {
-                GameManager.Instance.SetState(GameState.MainMenu);
-            }
-            else
-            {
-                Cursor.lockState = CursorLockMode.None;
-                Cursor.visible = true;
-
-                var pCtrl = FindAnyObjectByType<Player.PlayerController>();
-                var pLook = FindAnyObjectByType<Player.PlayerCameraLook>();
-                if (pCtrl != null) pCtrl.CanMove = false;
-                if (pLook != null) pLook.CanLook = false;
-            }
+            EnsureCursorUnlocked();
         }
 
         public void HideMenu()

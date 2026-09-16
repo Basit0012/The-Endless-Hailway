@@ -38,7 +38,12 @@ namespace EndlessHallway.Player
 
         private void Start()
         {
-            playerCamera = GetComponentInChildren<Camera>();
+            if (playerCamera == null)
+            {
+                playerCamera = GetComponentInChildren<Camera>();
+                if (playerCamera == null) playerCamera = Camera.main;
+            }
+
             if (rayOrigin == null && playerCamera != null)
             {
                 rayOrigin = playerCamera.transform;

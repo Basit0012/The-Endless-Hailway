@@ -403,11 +403,11 @@ namespace EndlessHallway.Editor
             vlg.childForceExpandHeight = false;
 
             // 5 Required Buttons
-            var startBtn = Create8BitButton(btnGroup.transform, "StartGameButton", "[ START GAME ]", 420, 58, btnNormalSprite, btnHoverSprite, btnPressedSprite, btnDisabledSprite, hoverClip, clickClip);
-            var contBtn = Create8BitButton(btnGroup.transform, "ContinueButton", "[ CONTINUE ]", 420, 58, btnNormalSprite, btnHoverSprite, btnPressedSprite, btnDisabledSprite, hoverClip, clickClip);
-            var optBtn = Create8BitButton(btnGroup.transform, "OptionsButton", "[ OPTIONS ]", 420, 58, btnNormalSprite, btnHoverSprite, btnPressedSprite, btnDisabledSprite, hoverClip, clickClip);
-            var credBtn = Create8BitButton(btnGroup.transform, "CreditsButton", "[ CREDITS ]", 420, 58, btnNormalSprite, btnHoverSprite, btnPressedSprite, btnDisabledSprite, hoverClip, clickClip);
-            var quitBtn = Create8BitButton(btnGroup.transform, "QuitButton", "[ QUIT ]", 420, 58, btnNormalSprite, btnHoverSprite, btnPressedSprite, btnDisabledSprite, hoverClip, clickClip);
+            var contBtn = Create8BitButton(btnGroup.transform, "ContinueButton", "[ CONTINUE ]", 440, 56, btnNormalSprite, btnHoverSprite, btnPressedSprite, btnDisabledSprite, hoverClip, clickClip);
+            var startBtn = Create8BitButton(btnGroup.transform, "NewGameButton", "[ NEW GAME ]", 440, 56, btnNormalSprite, btnHoverSprite, btnPressedSprite, btnDisabledSprite, hoverClip, clickClip);
+            var optBtn = Create8BitButton(btnGroup.transform, "SettingsButton", "[ SETTINGS & ACCESSIBILITY ]", 440, 56, btnNormalSprite, btnHoverSprite, btnPressedSprite, btnDisabledSprite, hoverClip, clickClip);
+            var credBtn = Create8BitButton(btnGroup.transform, "CreditsButton", "[ CREDITS ]", 440, 56, btnNormalSprite, btnHoverSprite, btnPressedSprite, btnDisabledSprite, hoverClip, clickClip);
+            var quitBtn = Create8BitButton(btnGroup.transform, "QuitButton", "[ QUIT TO DESKTOP ]", 440, 56, btnNormalSprite, btnHoverSprite, btnPressedSprite, btnDisabledSprite, hoverClip, clickClip);
 
             // Wire MainMenuUI
             var mainMenuUI = canvasObj.GetComponent<MainMenuUI>();
@@ -992,7 +992,7 @@ namespace EndlessHallway.Editor
 
             var tmp = txtObj.AddComponent<TextMeshProUGUI>();
             tmp.text = labelText;
-            tmp.fontSize = 18f;
+            tmp.fontSize = 22f;
             tmp.fontStyle = FontStyles.Bold;
             tmp.characterSpacing = 20f;
             tmp.color = new Color(0.94f, 0.94f, 0.92f, 1f);

@@ -68,10 +68,18 @@ namespace EndlessHallway.UI
             if (resetDefaultsButton != null) resetDefaultsButton.onClick.AddListener(OnResetDefaultsClicked);
         }
 
+        private void OnEnable()
+        {
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+        }
+
         public void Open(Action onClose = null)
         {
             onClosedCallback = onClose;
             panelRoot.SetActive(true);
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
             RefreshUIValues();
         }
 
@@ -182,7 +190,7 @@ namespace EndlessHallway.UI
             SettingsManager.Instance.ColorblindAssistance = val;
         }
 
-        private void OnResetDefaultsClicked()
+        public void OnResetDefaultsClicked()
         {
             if (SettingsManager.Instance != null)
             {

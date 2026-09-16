@@ -1999,6 +1999,49 @@ namespace EndlessHallway.Editor
                 if (gVol != null) SetField(stress, "globalVolume", gVol.GetComponent<Volume>());
 
                 EditorUtility.SetDirty(stress);
+
+                // Ensure Adventure_Character rig
+                var pCtrl = player.GetComponent<PlayerController>();
+                var charChild = player.transform.Find("Adventure_Character");
+                if (charChild == null)
+                {
+                    var charPrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Adventure_Character/Prefabs/Man_03.prefab");
+                    if (charPrefab != null)
+                    {
+                        var charInstance = (GameObject)PrefabUtility.InstantiatePrefab(charPrefab, player.transform);
+                        charInstance.name = "Adventure_Character";
+                        charInstance.transform.localPosition = new Vector3(0f, -0.9f, 0f);
+                        charInstance.transform.localRotation = Quaternion.identity;
+                        charChild = charInstance.transform;
+                    }
+                }
+
+                if (charChild != null)
+                {
+                    foreach (var smr in charChild.GetComponentsInChildren<SkinnedMeshRenderer>(true))
+                    {
+                        string n = smr.gameObject.name.ToLower();
+                        if (n.Contains("head") || n.Contains("eyes") || n.Contains("jaw") || n.Contains("face") || n.Contains("balaclava"))
+                        {
+                            smr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.ShadowsOnly;
+                        }
+                    }
+
+                    if (pCtrl != null)
+                    {
+                        SetField(pCtrl, "characterModel", charChild.gameObject);
+                        SetField(pCtrl, "characterAnimator", charChild.GetComponent<Animator>());
+                    }
+                }
+
+                var camHolder = player.transform.Find("CameraHolder");
+                if (camHolder != null)
+                {
+                    camHolder.localPosition = new Vector3(0f, 0.82f, 0.06f);
+                    if (pCtrl != null) SetField(pCtrl, "cameraHolder", camHolder);
+                }
+
+                if (pCtrl != null) EditorUtility.SetDirty(pCtrl);
             }
 
             // 3. Ensure Observer systems

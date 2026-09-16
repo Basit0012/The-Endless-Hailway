@@ -350,113 +350,31 @@ namespace EndlessHallway.Editor
             if (fClip != null && jsClip != null) fClip.SetValue(js, jsClip);
         }
 
+        [MenuItem("Tools/Endless Hallway/Build Staircase Area Only", false, 26)]
+        public static void BuildStaircaseOnly()
+        {
+            var envRoot = GameObject.Find("Environment");
+            if (envRoot == null) envRoot = new GameObject("Environment");
+
+            Material wallMat = AssetDatabase.LoadAssetAtPath<Material>("Assets/_Project/Materials/M_Corridor_Wall.mat");
+            Material floorMat = AssetDatabase.LoadAssetAtPath<Material>("Assets/_Project/Materials/M_Corridor_Floor.mat");
+            Material ceilingMat = AssetDatabase.LoadAssetAtPath<Material>("Assets/_Project/Materials/M_Corridor_Ceiling.mat");
+            Material trimMat = AssetDatabase.LoadAssetAtPath<Material>("Assets/_Project/Materials/M_Corridor_Trim.mat");
+            Material stairWoodMat = GetOrCreateMat("Assets/_Project/Materials/M_Staircase_Wood.mat", new Color(0.22f, 0.15f, 0.09f), 0.65f);
+
+            BuildStairwellLanding(envRoot, wallMat, floorMat, ceilingMat, trimMat, stairWoodMat);
+
+            EditorUtility.SetDirty(envRoot);
+            UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(UnityEngine.SceneManagement.SceneManager.GetActiveScene());
+            UnityEditor.SceneManagement.EditorSceneManager.SaveOpenScenes();
+
+            Debug.Log("[HotelExpansionBuilder] Staircase Area successfully rebuilt and saved!");
+        }
+
         private static void BuildStairwellLanding(GameObject envRoot, Material wallMat, Material floorMat, Material ceilingMat, Material trimMat, Material stairWoodMat)
         {
-            var oldLanding = GameObject.Find("StairwellLanding");
-            if (oldLanding != null) Object.DestroyImmediate(oldLanding);
-
-            GameObject landing = new GameObject("StairwellLanding");
-            landing.transform.SetParent(envRoot.transform);
-
-            float cx = 0.0f; float cz = 27.5f; float rw = 5.2f; float rl = 7.0f; float rh = 5.5f;
-
-            // Floor & Ceiling (High ceiling disappearing into darkness)
-            CreateBox(landing.transform, "Floor", new Vector3(cx, -0.05f, cz), new Vector3(rw, 0.1f, rl), floorMat);
-            CreateBox(landing.transform, "Ceiling", new Vector3(cx, rh + 0.05f, cz), new Vector3(rw, 0.1f, rl), ceilingMat);
-
-            // Walls (Two-tone mustard & teal matching Reference Image 0)
-            CreateBox(landing.transform, "Wall_Left_West", new Vector3(cx - rw/2f, rh/2f, cz), new Vector3(0.1f, rh, rl), wallMat);
-            CreateBox(landing.transform, "Wall_Right_East", new Vector3(cx + rw/2f, rh/2f, cz), new Vector3(0.1f, rh, rl), wallMat);
-            CreateBox(landing.transform, "Wall_Far_North", new Vector3(cx, rh/2f, cz + rl/2f), new Vector3(rw, rh, 0.1f), wallMat);
-
-            // Waist-height dark wood trim strip along left wall (matching photo)
-            CreateBox(landing.transform, "Dado_Rail_Left", new Vector3(cx - rw/2f + 0.03f, 1.15f, cz), new Vector3(0.05f, 0.08f, rl), trimMat);
-
-            // The Wooden Staircase ascending along East Wall (Z = 25.5 to 30.5, Y = 0 to 4.2)
-            GameObject stairsGroup = new GameObject("Stairs");
-            stairsGroup.transform.SetParent(landing.transform);
-
-            int numSteps = 16;
-            float stepRise = 0.22f;
-            float stepRun = 0.30f;
-            float stairWidth = 1.35f;
-            float startZ = 25.2f;
-            float stairX = cx + rw/2f - (stairWidth / 2f);
-
-            for (int i = 0; i < numSteps; i++)
-            {
-                float stepY = (i + 0.5f) * stepRise;
-                float stepZ = startZ + (i * stepRun);
-                var tread = CreateBox(stairsGroup.transform, $"Step_{i}", new Vector3(stairX, stepY, stepZ), new Vector3(stairWidth, stepRise, stepRun), stairWoodMat);
-            }
-
-            // Newel Post at base of stairs (with sphere cap matching photo)
-            float newelX = stairX - (stairWidth / 2f) + 0.05f;
-            float newelZ = startZ;
-            GameObject post = CreateBox(stairsGroup.transform, "NewelPost", new Vector3(newelX, 0.55f, newelZ), new Vector3(0.12f, 1.1f, 0.12f), stairWoodMat);
-
-            GameObject sphereCap = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            sphereCap.name = "SphereCap";
-            sphereCap.transform.SetParent(post.transform);
-            sphereCap.transform.localPosition = new Vector3(0f, 0.6f, 0f);
-            sphereCap.transform.localScale = new Vector3(1.3f, 1.3f, 1.3f);
-            sphereCap.GetComponent<Renderer>().sharedMaterial = stairWoodMat;
-            Object.DestroyImmediate(sphereCap.GetComponent<Collider>());
-
-            // Banister Handrail ascending with stairs
-            GameObject handrail = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            handrail.name = "Handrail";
-            handrail.transform.SetParent(stairsGroup.transform);
-            float railLen = Mathf.Sqrt(Mathf.Pow(numSteps * stepRun, 2) + Mathf.Pow(numSteps * stepRise, 2));
-            float railAngle = Mathf.Atan2(numSteps * stepRise, numSteps * stepRun) * Mathf.Rad2Deg;
-            handrail.transform.position = new Vector3(newelX, (numSteps * stepRise) / 2f + 0.9f, startZ + (numSteps * stepRun) / 2f);
-            handrail.transform.rotation = Quaternion.Euler(railAngle, 0f, 0f);
-            handrail.transform.localScale = new Vector3(0.08f, 0.08f, railLen);
-            handrail.GetComponent<Renderer>().sharedMaterial = stairWoodMat;
-
-            // Spindles / Balusters
-            for (int b = 1; b < numSteps; b += 2)
-            {
-                float bY = (b * stepRise) + 0.45f;
-                float bZ = startZ + (b * stepRun);
-                CreateBox(stairsGroup.transform, $"Baluster_{b}", new Vector3(newelX, bY, bZ), new Vector3(0.04f, 0.9f, 0.04f), stairWoodMat);
-            }
-
-            // Paintings on Left Wall (Matching Reference Image 0):
-            // 1. The Cubist Wheel-Ear Clown portrait
-            Material matClown = AssetDatabase.LoadAssetAtPath<Material>("Assets/_Project/Materials/Paintings/M_Painting_ClownTires.mat");
-            if (matClown == null) matClown = AssetDatabase.LoadAssetAtPath<Material>("Assets/_Project/Materials/Paintings/M_Painting_Stage0.mat");
-            CreateFramedPainting(landing.transform, "Painting_Clown_Image0", new Vector3(cx - rw/2f + 0.04f, 1.9f, 26.0f), new Vector3(1.1f, 1.1f, 0.04f), matClown, trimMat);
-
-            // 2. The Minimalist Penguin portrait hung slightly askew
-            Material matPenguin = AssetDatabase.LoadAssetAtPath<Material>("Assets/_Project/Materials/Paintings/M_Painting_Penguin.mat");
-            if (matPenguin != null)
-            {
-                var pObj = CreateFramedPainting(landing.transform, "Painting_Penguin_Image0", new Vector3(cx - rw/2f + 0.04f, 2.1f, 28.5f), new Vector3(0.7f, 0.85f, 0.04f), matPenguin, trimMat);
-                pObj.transform.localRotation = Quaternion.Euler(0f, 90f, -3.5f);
-            }
-
-            // Landing Light (Warm point light angled to create dramatic falloff like Image 0)
-            GameObject landingLightObj = new GameObject("LandingLight");
-            landingLightObj.transform.SetParent(landing.transform);
-            landingLightObj.transform.position = new Vector3(cx - 0.8f, 3.2f, 26.5f);
-            var ll = landingLightObj.AddComponent<Light>();
-            ll.type = LightType.Point;
-            ll.range = 8.5f;
-            ll.intensity = 1.8f;
-            ll.color = new Color(1.0f, 0.88f, 0.65f); // warm 3200K
-            ll.shadows = LightShadows.Soft;
-
-            // Far hallway observer spawn at base of stairs
-            var spawnRoot = GameObject.Find("SpawnPoints");
-            if (spawnRoot != null)
-            {
-                var oldFar = GameObject.Find("ObserverSpawn_FarHallway");
-                if (oldFar != null)
-                {
-                    oldFar.transform.position = new Vector3(cx, 0f, 25.5f);
-                }
-            }
+            // Build the complete dark central staircase attic room
+            AtticRoomBuilder.BuildCompleteAtticRoom();
         }
 
         private static GameObject CreateFramedPainting(Transform parent, string name, Vector3 pos, Vector3 scale, Material canvasMat, Material frameMat)

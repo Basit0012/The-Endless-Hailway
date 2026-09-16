@@ -138,11 +138,9 @@ namespace EndlessHallway.UI
             {
                 GameManager.Instance.SetState(GameState.MainMenu);
             }
-            else
-            {
-                SetCursorState(true);
-                SetPlayerControls(false);
-            }
+
+            SetCursorState(true);
+            SetPlayerControls(false);
             Time.timeScale = 1f;
         }
 

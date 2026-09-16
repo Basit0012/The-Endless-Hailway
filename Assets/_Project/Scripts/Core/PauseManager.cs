@@ -46,7 +46,7 @@ namespace EndlessHallway.Core
             FindPlayerReferences();
 
             // Ensure an EventSystem exists in the scene so UI buttons can receive click events
-            if (UnityEngine.EventSystems.EventSystem.current == null)
+            if (FindAnyObjectByType<UnityEngine.EventSystems.EventSystem>() == null)
             {
                 var esObj = new GameObject("EventSystem");
                 esObj.AddComponent<UnityEngine.EventSystems.EventSystem>();
