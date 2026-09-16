@@ -1,156 +1,153 @@
 # The Endless Hallway 🕯️
 
-A tense, atmospheric first-person psychological horror and anomaly-detection experience built in **Unity 6 (URP)**. Inspired by classic psychological horror titles like *P.T.* and *The Exit 8*, players find themselves trapped in an unsettling, looping hotel corridor known as the **Marrow Point Residences**.
+> A tense, atmospheric first-person psychological horror and anomaly-detection experience built in **Unity 6 (URP)**.  
+> Inspired by *P.T.* and *The Exit 8* — players loop endlessly through an unsettling hotel corridor known as **Marrow Point Residences**, hunting anomalies and surviving the Observer.
 
 ---
 
-## 📸 In-Engine Screenshots
+## 📸 Full In-Engine Screenshot Gallery
 
-### Cathedral Attic — Grand Central Staircase
-*Player eye-level view ascending the 16-step central staircase towards the stone fireplace under the soaring 8m A-frame cathedral ceiling*
+### 🏨 The Hotel Corridor
 
-![Cathedral Concept View](Docs/Screenshots/cathedral_concept.png)
-
-### Ascending the Staircase
-*Looking up from midway on the stairs — warm lantern glow, timber A-frame rafters at 8m apex, bilateral walkways visible on both sides*
-
-![Stair Climb View](Docs/Screenshots/stair_climb.png)
-
-### Descending the Stairwell
-*Looking down from the upper landing towards the lower hallway entrance — stair railings, stone fireplace flanked by portrait frames*
-
-![Stair Down View](Docs/Screenshots/stair_down.png)
+| View | Screenshot |
+|------|-----------|
+| **Corridor Entrance** — Looking down from spawn, ceiling lights, door row visible, Observer entity mid-hallway | ![Corridor Entrance](Docs/Screenshots/ss_01_corridor_entrance.png) |
+| **Far End / Elevator** — Reverse angle looking back at the blue-lit elevator bay and crossing Observer | ![Elevator End](Docs/Screenshots/ss_03_corridor_elevator.png) |
+| **Low Angle — Horror Atmosphere** — Floor-level shot of the dark corridor with emergency lighting | ![Low Angle](Docs/Screenshots/ss_10_emergency_floor_lights.png) |
+| **Room 210 Door** — Left corridor, hotel room door with worn wood panelling | ![Room 210](Docs/Screenshots/ss_08_room210_door.png) |
+| **Room 214 Door** — Right corridor, opposing room door | ![Room 214](Docs/Screenshots/ss_09_room214_door.png) |
+| **Wall Painting & Cork Noticeboard** — Anomaly-eligible dressing, cryptic message pinboard | ![Wall Painting](Docs/Screenshots/ss_06_wall_painting.png) |
+| **Floor Clue** — Fallen incident report document visible on carpet | ![Floor Clue](Docs/Screenshots/ss_07_floor_clue.png) |
 
 ---
 
-## 🎮 Game Overview & Core Mechanics
+### 🪜 Staircase & Attic Transition
+
+| View | Screenshot |
+|------|-----------|
+| **Staircase Entrance** — From the corridor, looking up into the dark opening of the attic | ![Stair Entrance](Docs/Screenshots/ss_11_stair_entrance.png) |
+| **Corridor to Attic** — Low angle looking up at the stone chimney gable framed by stair rails | ![Corridor to Attic](Docs/Screenshots/ss_19_corridor_to_attic.png) |
+| **Staircase From Landing** — Looking down 16 steps from the upper landing, dark bilateral walkways visible | ![Staircase Full](Docs/Screenshots/ss_18_staircase_full.png) |
+
+---
+
+### 🏚️ The Attic Room
+
+| View | Screenshot |
+|------|-----------|
+| **Overhead Attic View** — Bird's eye view of the full attic: central stairs, dual walkways, fireplace at far wall | ![Attic Overhead](Docs/Screenshots/ss_12_attic_overhead.png) |
+| **West Path — Desk & Shelves** — Cluttered study desk, papers, spindle chair, metal shelving against knee-wall | ![Attic West Path](Docs/Screenshots/ss_13_attic_west_path.png) |
+| **East Path — Crate & Rug** — Shipping crate, dark stained rug, near-black corner atmosphere | ![Attic East Path](Docs/Screenshots/ss_14_attic_east_path.png) |
+| **Stone Fireplace Close-Up** — Hollow stone firebox, charred interior, timber mantel | ![Fireplace](Docs/Screenshots/ss_15_fireplace.png) |
+| **Portrait Frames** — Left portrait flanking the chimney, warm rim-light from lantern | ![Portrait Left](Docs/Screenshots/ss_16_portrait_left.png) |
+| **Wide Attic Concept** — Full room: bilateral walkways, railings, fireplace wall far end | ![Attic Wide](Docs/Screenshots/ss_20_attic_wide_concept.png) |
+
+---
+
+### 💡 Cathedral Ceiling & Lantern
+
+| View | Screenshot |
+|------|-----------|
+| **Lantern & Rafters** — Looking straight up at the hanging 2700K lantern under the 8m A-frame apex, collar ties and rafters radiating outward | ![Lantern Rafters](Docs/Screenshots/ss_17_lantern_rafters.png) |
+
+---
+
+## 🎮 Game Overview
 
 ### 🌀 The Anomaly Loop System
-- **Observation is Survival**: Every loop through the corridor presents subtle or overt deviations from reality.
-- **Anomaly Detection**: Players must scrutinize paintings, lighting fixtures, door numbers, ambient sounds, and room layouts.
-- **Loop Progression**: Identifying an anomaly and taking the correct path advances your escape; failing to notice one resets the loop or triggers hostile encounters with the unseen **Observer**.
+- **Observation is Survival**: Every loop presents subtle deviations from reality — study paintings, door numbers, lighting, sounds, and room layouts.
+- **Anomaly Detection**: Correctly identifying an anomaly and taking the right path advances your escape. Missing it triggers the Observer.
+- **The Observer**: A hostile entity that patrols the corridor — avoid eye contact, don't run when it's watching.
 
-### 🏃 First-Person Controller & Interaction
-- Smooth first-person character movement with WASD traversal, sprinting, crouching, and responsive mouse look.
-- Interactive inspection system (`Examinable`) for picking up and examining hotel logs, room service slips, old newspapers, and cryptic notes.
-- Dynamic head bob, footstep audio, and interaction reticles with contextual HUD prompts (`[E] Inspect`).
-- **Adventure_Character** asset integrated at eye-height (`Y = 1.65m`) with correct camera rig, InteractionSystem raycast hooked to camera forward vector.
+### 🏃 First-Person Controller
+- Smooth WASD movement with sprinting, crouching, and responsive mouse look.
+- `Adventure_Character` asset integrated at eye height (`Y = 1.65m`) with correct camera rig.
+- Interactive inspection system for examining hotel logs, incident reports, cryptic notes.
+- Dynamic head bob, footstep audio, interaction reticles with contextual HUD prompts (`[E] Inspect`).
 
-### 🏚️ The Central Attic Room & Grand Staircase
-- **Central Staircase (`X = 0.0m`)**: Centered directly in line with the hallway doorway — 16 grand steps (`rise = 0.175m`, `run = 0.28m`) ascending seamlessly into the dark attic above. Smooth invisible movement ramp prevents step-snagging.
-- **Bilateral Walkways**: Generous 2.5m-wide paths on both the left and right sides of the central stair opening, allowing complete 360° circulation around the room.
-- **Cathedral Ceiling**: A-frame pitched roof with apex at **8.00m**, knee walls at **4.10m**, and horizontal collar tie beams at **7.10m** — providing massive open vertical headroom throughout.
-- **Grand Stone Fireplace & Chimney**: Centered on the far North wall directly facing the stair arrival. 3D hollow firebox with charred interior cavity, stone surround pillars, heavy lintel, timber mantel shelf, and chimney shaft rising to the apex.
-- **Atmospheric Horror Lighting**:
-  - Single warm 2700K overhead hanging lantern at **Y = 6.05m** with soft shadow casting (intensity `6.0f`, range `15m`).
-  - High-smoothness wet-look wooden plank floors reflecting ambient light.
-  - Pitched timber A-frame roof rafters and near-black ambient corners.
-  - Distant beacon light glowing down in the corridor void below the stairs.
-- **Environmental Props**: Metal/wood library shelving unit, cluttered study desk, spindle chair, shipping crate, and stained floor rug.
-- **Symmetrical Balustrades**: Timber railings with 24 balusters each along the left and right stair sides. Solid fall-prevention colliders on both sides.
+### 🏚️ The Central Attic Room
+- **16-step central grand staircase** at `X = 0.0m`, ascending from the corridor into the dark attic.
+- **Bilateral walkways** (2.5m each side) allowing full 360° circulation around the stair opening.
+- **Cathedral A-frame ceiling**: apex at **8.00m**, knee walls at **4.10m**, collar ties at **7.10m**.
+- **Grand Stone Fireplace**: hollow firebox, stone surround, timber mantel, flanked by portrait frames.
+- **Single warm lantern** at `Y = 6.05m` casting a tight 2700K pool of light — near-black corners.
 
 ---
 
 ## 🕹️ Controls
 
-| Action | Primary Key | Secondary / Controller |
-|---|---|---|
-| **Move** | `W` `A` `S` `D` | Left Stick |
-| **Look** | `Mouse Movement` | Right Stick |
-| **Sprint** | `Left Shift` | Left Stick Click |
-| **Crouch** | `Left Ctrl` / `C` | `B` / Circle |
-| **Interact / Inspect** | `E` | `X` / Square |
-| **Close Clue / Dismiss** | `E` / `Escape` | `B` / Circle |
-| **Pause / Settings** | `Escape` / `Tab` | `Start` / Menu |
+| Action | Key | Controller |
+|--------|-----|-----------|
+| **Move** | `W A S D` | Left Stick |
+| **Look** | Mouse | Right Stick |
+| **Sprint** | `Left Shift` | L3 |
+| **Crouch** | `Ctrl` / `C` | `B` |
+| **Interact** | `E` | `X` |
+| **Pause** | `Escape` | `Start` |
 
 ---
 
-## 📋 Development History — What Has Been Done
+## 📋 Development History
 
-### ✅ v1.0 — Character Integration & Controller Rigging
-- **Adventure_Character asset** imported from `Assets/` and rigged to the existing `PlayerController.cs`.
-- First-person camera attached at **eye height (`Y = 1.65m`)** matching the character rig.
-- WASD movement, mouse look, sprint, and crouch all preserved from existing controller.
-- `InteractionSystem` raycast hooked to camera forward vector — no new controller created.
-- `LoopManager` and `AnomalyManager` references preserved intact.
+### ✅ v1.0 — Character Integration
+- `Adventure_Character` asset imported from `Assets/` and rigged to `PlayerController.cs`.
+- First-person camera at eye height (`Y = 1.65m`) matching character rig.
+- `InteractionSystem` raycast hooked to camera forward. `LoopManager` + `AnomalyManager` references preserved.
 
-### ✅ v2.0 — Main Menu Fix (Buttons & Cursor)
-- Diagnosed and fixed non-clickable main menu buttons.
-- **Root Cause**: `PlayerController.Update()` was unconditionally setting `Cursor.lockState = CursorLockMode.Locked` and `Cursor.visible = false` every frame — locking the cursor even on the main menu screen.
-- Added `isMenuOpen` game-state guard so cursor is only locked while actually in-game.
-- Confirmed single `EventSystem` in the main menu scene.
-- Confirmed `Canvas` has `GraphicRaycaster` enabled, render mode `Screen Space - Overlay`.
-- Buttons resized and anchor/pivot corrected for all five menu items (Continue, New Game, Settings & Accessibility, Credits, Quit to Desktop).
+### ✅ v2.0 — Main Menu Fix
+- **Root Cause**: `PlayerController.Update()` unconditionally set `Cursor.lockState = Locked` every frame — killing menu clicks.
+- Added `isMenuOpen` game-state guard. Confirmed single `EventSystem` and `GraphicRaycaster`. Fixed button sizing/anchors.
 
-### ✅ v3.0 — Central Staircase & Attic Room Overhaul
-- Completely rebuilt `AtticRoomBuilder.BuildCompleteAtticRoom()` from right-side staircase to **centrally-positioned grand staircase**.
-- Central staircase at `X = 0.0m`, bilateral walkways `2.5m` wide on each side.
-- Stone chimney and fireplace relocated to the **far North wall** directly across from the stair top.
-- 3D hollow firebox with charred cavity, stone surround, timber mantel, and portrait frames.
-- Lantern fixture hanging from apex with warm 2700K lighting.
-- Wet-look reflective plank flooring with procedurally generated normal and gloss mask textures.
-- Near-black ambient corners, dark mood, horror atmosphere.
+### ✅ v3.0 — Attic Room Overhaul
+- Rebuilt `AtticRoomBuilder` with **centrally-positioned grand staircase** at `X = 0.0m`.
+- Bilateral walkways, stone chimney on far North wall, wet-look reflective plank flooring.
+- Warm 2700K hanging lantern, near-black ambient corners, horror mood.
 
-### ✅ v4.0 — Roof Height Elevation & Stair Climbing Fix
-- **Bug**: Player character could not climb the stairs.
-  - **Root Cause 1**: All 16 step treads and risers had active `BoxCollider` components, causing `CharacterController` to stop at the first vertical riser face.
-  - **Root Cause 2**: Roof apex was at `5.85m` with collar ties at `4.90m`, giving cramped overhead feeling as player rose `2.80m` above ground.
-  - **Root Cause 3**: Landing slab front edge presented a vertical lip threshold at `Z = 29.28m`.
-- **Fix 1 — Visual-Only Steps**: All stair treads, risers, under-supports, stringers, and bulkheads made collider-free (visual geometry only).
-- **Fix 2 — Smooth Movement Ramp**: Dedicated `Stair_MovementRamp` invisible ramp starting at `Y = -0.05m` (submerged into ground) and rising at `31.89°` to landing at `Y = 2.80m`.
-- **Fix 3 — Landing Transition Pad**: `Stair_LandingPad` collider spans the threshold at `Z = 29.20m – 29.50m` to eliminate any lip.
-- **Fix 4 — Cathedral Roof Elevation**:
-  - Apex: **8.00m** (was 5.85m)
-  - Knee walls: **4.10m** (was 3.35m)
-  - Collar ties: **7.10m** (was 4.90m)
-  - Hanging lantern: **6.05m** (was 4.35m) with cord from `7.00m`
-  - Chimney shaft: extended through `8.10m`
-- **Verified** with in-engine CharacterController simulation: `CLIMB SUCCESSFUL` and `DESCENT SUCCESSFUL`.
-- **Verified** with overhead raycasts: `NO HIT (infinite open headroom)` on all 16 steps at all X positions.
+### ✅ v4.0 — Roof Height & Stair Climbing Fix
+- **Bug**: Character stopped at first stair riser (`CharacterController` snagging on 90° collider faces).
+- **Fix**: Invisible smooth `Stair_MovementRamp` at `31.89°` replaces individual step colliders.
+- **Roof**: Apex elevated to **8.00m** (was 5.85m), giving cathedral headroom throughout.
+- **Verified** with automated raycast + physics simulation: `CLIMB SUCCESSFUL`, `DESCENT SUCCESSFUL`.
 
 ---
 
-## 🏗️ Technical Architecture & Tools
+## 🏗️ Technical Architecture
 
-- **Engine Version**: Unity 6 (`6000.3.10f1`)
-- **Render Pipeline**: Universal Render Pipeline (URP)
-- **Editor Utilities**:
-  - [`AtticRoomBuilder.cs`](Assets/_Project/Scripts/Editor/AtticRoomBuilder.cs): Automated procedural builder for the central staircase, bilateral floor paths, balustrades, hollow fireplace, cathedral ceiling, and atmospheric lighting. Menu: **Tools > Endless Hallway > Build Complete Dark Attic Room**.
-  - [`HotelExpansionBuilder.cs`](Assets/_Project/Scripts/Editor/HotelExpansionBuilder.cs): Builds and connects expanded hotel rooms (Room 210, Room 212, Utility Room 216).
-  - [`SceneSetupUtility.cs`](Assets/_Project/Scripts/Editor/SceneSetupUtility.cs): Automated scene validation, light calibration, and camera setup.
-  - [`MasterBuildUtility.cs`](Assets/_Project/Scripts/Editor/MasterBuildUtility.cs): One-click build pipeline for all systems.
-  - [`RetroUIBuilder.cs`](Assets/_Project/Scripts/Editor/): Retro CRT canvas and menu builder.
+- **Engine**: Unity 6 (`6000.3.10f1`) — Universal Render Pipeline (URP)
+- **Editor Builders**:
+  - [`AtticRoomBuilder.cs`](Assets/_Project/Scripts/Editor/AtticRoomBuilder.cs) — Procedural attic, stairs, fireplace, lighting. Menu: **Tools > Build Complete Dark Attic Room**
+  - [`HotelExpansionBuilder.cs`](Assets/_Project/Scripts/Editor/HotelExpansionBuilder.cs) — Hotel rooms 210, 212, 216
+  - [`SceneSetupUtility.cs`](Assets/_Project/Scripts/Editor/SceneSetupUtility.cs) — Scene validation and light calibration
 - **Player Scripts**:
-  - [`PlayerController.cs`](Assets/_Project/Scripts/Player/PlayerController.cs): First-person movement, sprint, crouch, mouse look with menu-state cursor guard.
-  - [`GameManager.cs`](Assets/_Project/Scripts/Core/GameManager.cs): Loop state, anomaly references, scene management.
+  - [`PlayerController.cs`](Assets/_Project/Scripts/Player/PlayerController.cs) — Movement, sprint, crouch, mouse look, menu-state cursor guard
+  - [`GameManager.cs`](Assets/_Project/Scripts/Core/GameManager.cs) — Loop state, anomaly references, scene management
 
 ---
 
-## 🚀 Future Updates & Roadmap
+## 🚀 Future Roadmap
 
-### Phase 1: Gameplay & Anomaly Expansion
-- [ ] **Expanded Anomaly Catalog**: Over 50 unique procedural anomalies including spatial distortions, flickering silhouettes, backwards audio, and shifting wall messages.
-- [ ] **Interactive Attic Puzzles**: Secret compartment puzzle in the stone chimney, clockwork mechanism behind the framed portraits, and collectible attic keys.
-- [ ] **Inventory & Item System**: Flashlight with battery management, camera with polaroid snapshot functionality to document anomalies.
+### Phase 1 — Gameplay Expansion
+- [ ] 50+ unique procedural anomalies (spatial distortions, flickering silhouettes, reversed audio, shifting wall text)
+- [ ] Attic puzzles: chimney compartment, clockwork portrait mechanism, collectible keys
+- [ ] Flashlight with battery management, camera with Polaroid snapshot to document anomalies
 
-### Phase 2: AI Entity & Threat Mechanics
-- [ ] **The Observer AI Overhaul**: State-machine-driven wandering entity with dynamic line-of-sight detection, footstep listening, and hiding spots (under beds, inside wardrobes).
-- [ ] **Sanity & Hallucination System**: Prolonged exposure to dark corners and anomalous rooms distorts player vision and induces audio hallucinations.
+### Phase 2 — AI & Threat
+- [ ] Observer AI overhaul: state-machine wandering, line-of-sight detection, footstep listening
+- [ ] Sanity & hallucination system: distorted vision, audio hallucinations in dark corners
 
-### Phase 3: Audio & Immersion
-- [ ] **Binaural 3D Audio**: Dynamic corridor acoustics with positional occlusion, creaking floorboards, and distant elevator hum.
-- [ ] **Adaptive Horror Soundtrack**: Context-sensitive music layers that build tension as the player approaches critical loop thresholds.
+### Phase 3 — Audio & Immersion
+- [ ] Binaural 3D corridor acoustics with positional occlusion, creaking floorboards
+- [ ] Adaptive horror soundtrack — context-sensitive tension layers
 
-### Phase 4: Platform & Quality of Life
-- [ ] **Save & Progress Persistence**: JSON-based save system tracking discovered anomalies, best loop streaks, and player statistics.
-- [ ] **Accessibility Suite**: Full subtitle customization, screen-shake toggle, high-contrast UI mode, and remappable inputs.
-- [ ] **Steam Achievements & Cloud Save Support**.
-- [ ] **VR Mode Exploration**: Experimental OpenXR / SteamVR support for total immersion.
-- [ ] **Attic Room Extended Content**: Additional hidden rooms accessible via false chimney brickwork, breakable weakened plank floor sections, and a secret sub-attic crawlspace.
+### Phase 4 — Platform & QoL
+- [ ] JSON-based save system (discovered anomalies, best loop streaks)
+- [ ] Accessibility suite: subtitles, screen-shake toggle, high-contrast UI, remappable inputs
+- [ ] VR Mode (OpenXR / SteamVR experimental)
+- [ ] Hidden sub-attic crawlspace via false chimney brickwork
 
 ---
 
-## 📄 License & Credits
+## 📄 Credits
 
-Developed with love for horror gaming by **Basit** and pair-programmed with **Antigravity**.  
+Developed by **Basit** with pair-programming assistance from **Antigravity (Google DeepMind)**.  
 All rights reserved © 2026.
