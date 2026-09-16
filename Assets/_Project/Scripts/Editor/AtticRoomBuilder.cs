@@ -142,12 +142,8 @@ namespace EndlessHallway.Editor
                 new Vector3(0.0f, slabMidY, northLandMidZ),
                 new Vector3(1.40f, slabH, northLandLen), floorMat);
 
-            // 4d. South Cross-Path (Above Hallway Doorway): X = -0.70 to +0.70 (width 1.40m), Z = 24.00 to 24.65 (len 0.65m)
-            float southCrossMidZ = (roomMinZ + stairHoleMinZ) / 2f; // 24.325m
-            float southCrossLen = stairHoleMinZ - roomMinZ; // 0.65m
-            CreateStaticBox(floorGroup.transform, "AtticFloor_SouthCross",
-                new Vector3(0.0f, slabMidY, southCrossMidZ),
-                new Vector3(1.40f, slabH, southCrossLen), floorMat);
+            // Note: South cross-slab is omitted over the stair entrance (X = -0.70 to +0.70)
+            // to provide 100% open, unconstrained vertical cathedral headroom above the player.
 
             // 5. Central Grand Staircase (Centered at X = 0.0m)
             GameObject stairsGroup = new GameObject("Stairs");
@@ -161,35 +157,35 @@ namespace EndlessHallway.Editor
             float flightRun = numSteps * stepRun; // 4.48m
             float flightRise = numSteps * stepRise; // 2.80m
 
-            // Bottom starter bullnose step
+            // Bottom starter bullnose step (visual only)
             CreateStaticBox(stairsGroup.transform, "Step_Plinth",
                 new Vector3(0.0f, 0.04f, startZ - 0.12f),
-                new Vector3(stairWidth + 0.10f, 0.08f, 0.28f), rafterMat);
+                new Vector3(stairWidth + 0.10f, 0.08f, 0.28f), rafterMat, false);
 
-            // Treads, Risers, and Under-Support
+            // Treads, Risers, and Under-Support (visual only - movement handled by smooth Stair_MovementRamp)
             for (int i = 0; i < numSteps; i++)
             {
                 float treadY = (i + 1) * stepRise;
                 float treadZ = startZ + (i + 0.5f) * stepRun;
                 float riserZ = startZ + (i * stepRun);
 
-                // Tread slab with nosing
+                // Tread slab with nosing (visual only)
                 CreateStaticBox(stairsGroup.transform, $"Step_Tread_{i}",
                     new Vector3(0.0f, treadY - 0.02f, treadZ),
-                    new Vector3(stairWidth, 0.04f, stepRun + 0.02f), rafterMat);
+                    new Vector3(stairWidth, 0.04f, stepRun + 0.02f), rafterMat, false);
 
-                // Closed vertical riser
+                // Closed vertical riser (visual only)
                 CreateStaticBox(stairsGroup.transform, $"Step_Riser_{i}",
                     new Vector3(0.0f, treadY - (stepRise / 2f), riserZ),
-                    new Vector3(stairWidth, stepRise, 0.03f), rafterMat);
+                    new Vector3(stairWidth, stepRise, 0.03f), rafterMat, false);
 
-                // Solid foundation under-support down to ground floor
+                // Solid foundation under-support down to ground floor (visual only)
                 if (i > 0)
                 {
                     float underHeight = i * stepRise;
                     CreateStaticBox(stairsGroup.transform, $"Step_UnderSupport_{i}",
                         new Vector3(0.0f, underHeight / 2f, treadZ),
-                        new Vector3(stairWidth - 0.02f, underHeight, stepRun), wallMat);
+                        new Vector3(stairWidth - 0.02f, underHeight, stepRun), wallMat, false);
                 }
             }
 
@@ -203,21 +199,23 @@ namespace EndlessHallway.Editor
             leftStringer.name = "Stringer_Left";
             leftStringer.transform.SetParent(stairsGroup.transform, false);
             leftStringer.transform.position = new Vector3(-stairWidth / 2f, stringerMidY, stringerMidZ);
-            leftStringer.transform.rotation = Quaternion.Euler(stairAngle, 0f, 0f);
+            leftStringer.transform.rotation = Quaternion.Euler(-stairAngle, 0f, 0f);
             leftStringer.transform.localScale = new Vector3(0.06f, 0.28f, stringerLen);
             leftStringer.GetComponent<Renderer>().sharedMaterial = rafterMat;
+            UnityEngine.Object.DestroyImmediate(leftStringer.GetComponent<Collider>());
             SetStaticFlags(leftStringer);
 
             var rightStringer = GameObject.CreatePrimitive(PrimitiveType.Cube);
             rightStringer.name = "Stringer_Right";
             rightStringer.transform.SetParent(stairsGroup.transform, false);
             rightStringer.transform.position = new Vector3(stairWidth / 2f, stringerMidY, stringerMidZ);
-            rightStringer.transform.rotation = Quaternion.Euler(stairAngle, 0f, 0f);
+            rightStringer.transform.rotation = Quaternion.Euler(-stairAngle, 0f, 0f);
             rightStringer.transform.localScale = new Vector3(0.06f, 0.28f, stringerLen);
             rightStringer.GetComponent<Renderer>().sharedMaterial = rafterMat;
+            UnityEngine.Object.DestroyImmediate(rightStringer.GetComponent<Collider>());
             SetStaticFlags(rightStringer);
 
-            // Solid Enclosed Bulkhead Walls along both stringers down to ground floor
+            // Solid Enclosed Bulkhead Walls along both stringers down to ground floor (visual only)
             GameObject underStairBulkhead = new GameObject("UnderStair_Bulkheads");
             underStairBulkhead.transform.SetParent(stairsGroup.transform, false);
             for (int u = 1; u < numSteps; u++)
@@ -226,20 +224,37 @@ namespace EndlessHallway.Editor
                 float uZ = startZ + (u + 0.5f) * stepRun;
                 CreateStaticBox(underStairBulkhead.transform, $"Bulkhead_Left_{u}",
                     new Vector3(-stairWidth / 2f - 0.01f, uHeight / 2f, uZ),
-                    new Vector3(0.04f, uHeight, stepRun), wallMat);
+                    new Vector3(0.04f, uHeight, stepRun), wallMat, false);
 
                 CreateStaticBox(underStairBulkhead.transform, $"Bulkhead_Right_{u}",
                     new Vector3(stairWidth / 2f + 0.01f, uHeight / 2f, uZ),
-                    new Vector3(0.04f, uHeight, stepRun), wallMat);
+                    new Vector3(0.04f, uHeight, stepRun), wallMat, false);
             }
 
             // Smooth Movement Incline Ramp Collider for seamless character movement
+            // Sloping upwards smoothly from submerged ground (Z = 24.70m, Y = -0.05m) to landing (Z = 29.28m, Y = 2.80m)
+            float rampRun = 4.58f;
+            float rampRise = 2.85f;
+            float rampMidZ = (24.70f + 29.28f) / 2f; // 26.99f
+            float rampMidY = (-0.05f + 2.80f) / 2f;  // 1.375f
+            float rampAngle = Mathf.Atan2(rampRise, rampRun) * Mathf.Rad2Deg; // 31.89°
+            float rampSlopeLen = Mathf.Sqrt(rampRun * rampRun + rampRise * rampRise); // 5.394m
+
             var stairRamp = new GameObject("Stair_MovementRamp");
             stairRamp.transform.SetParent(stairsGroup.transform, false);
-            stairRamp.transform.position = new Vector3(0.0f, stringerMidY, stringerMidZ);
-            stairRamp.transform.rotation = Quaternion.Euler(stairAngle, 0f, 0f);
+            stairRamp.transform.position = new Vector3(0.0f, rampMidY, rampMidZ);
+            stairRamp.transform.rotation = Quaternion.Euler(-rampAngle, 0f, 0f);
             var rampCol = stairRamp.AddComponent<BoxCollider>();
-            rampCol.size = new Vector3(stairWidth, 0.05f, stringerLen);
+            rampCol.size = new Vector3(stairWidth, 0.04f, rampSlopeLen);
+            rampCol.center = Vector3.zero;
+
+            // Transition Landing Pad to eliminate any lip at the landing threshold
+            var landingPad = new GameObject("Stair_LandingPad");
+            landingPad.transform.SetParent(stairsGroup.transform, false);
+            landingPad.transform.position = new Vector3(0.0f, 2.78f, 29.35f);
+            var padCol = landingPad.AddComponent<BoxCollider>();
+            padCol.size = new Vector3(stairWidth, 0.04f, 0.30f);
+            padCol.center = Vector3.zero;
 
             // Ground Floor under attic (Y = 0)
             CreateStaticBox(landing.transform, "Floor_Ground",
@@ -278,31 +293,34 @@ namespace EndlessHallway.Editor
                 new Vector3(0.0f, 2.50f, roomMinZ),
                 new Vector3(1.20f, 0.60f, 0.12f), wallMat);
 
-            // 6. Perimeter Knee-Walls (from floorY 2.80m up to 3.35m, height 0.55m)
+            // 6. Perimeter Knee-Walls (from floorY 2.80m up to 4.10m, height 1.30m)
             GameObject kneeGroup = new GameObject("Walls_Knee");
             kneeGroup.transform.SetParent(atticRoot.transform, false);
 
+            float apexY = 8.00f;
+            float kneeY = 4.10f;
+            float kneeH = kneeY - floorY; // 1.30m
+            float kneeMidY = (floorY + kneeY) / 2f; // 3.45m
+
             CreateStaticBox(kneeGroup.transform, "KneeWall_West",
-                new Vector3(-roomHalfW, 3.075f, roomMidZ),
-                new Vector3(0.12f, 0.55f, roomLen), wallMat);
+                new Vector3(-roomHalfW, kneeMidY, roomMidZ),
+                new Vector3(0.12f, kneeH, roomLen), wallMat);
 
             CreateStaticBox(kneeGroup.transform, "KneeWall_East",
-                new Vector3(roomHalfW, 3.075f, roomMidZ),
-                new Vector3(0.12f, 0.55f, roomLen), wallMat);
+                new Vector3(roomHalfW, kneeMidY, roomMidZ),
+                new Vector3(0.12f, kneeH, roomLen), wallMat);
 
-            // 7. Pitched Beam Ceiling (A-Frame Architecture)
-            // Apex at X = 0.0m, Y = 5.85m. Knee at X = ±3.20m, Y = 3.35m.
-            // Rise = 2.50m, Run = 3.20m, Angle ≈ 38.0°
+            // 7. Pitched Beam Ceiling (Cathedral A-Frame Architecture)
+            // Apex at X = 0.0m, Y = 8.00m. Knee at X = ±3.20m, Y = 4.10m.
+            // Rise = 3.90m, Run = 3.20m, Angle ≈ 50.6°
             GameObject roofGroup = new GameObject("Pitched_Roof");
             roofGroup.transform.SetParent(atticRoot.transform, false);
 
-            float apexY = 5.85f;
-            float kneeY = 3.35f;
-            float rise = apexY - kneeY; // 2.50m
+            float rise = apexY - kneeY; // 3.90m
             float run = roomHalfW;      // 3.20m
-            float roofSlopeLen = Mathf.Sqrt(rise * rise + run * run) + 0.20f; // ~4.26m
-            float pitchAngle = Mathf.Atan2(rise, run) * Mathf.Rad2Deg; // 38.0°
-            float midSlopeY = (apexY + kneeY) / 2f; // 4.60m
+            float roofSlopeLen = Mathf.Sqrt(rise * rise + run * run) + 0.20f; // ~5.25m
+            float pitchAngle = Mathf.Atan2(rise, run) * Mathf.Rad2Deg; // 50.63°
+            float midSlopeY = (apexY + kneeY) / 2f; // 6.05m
 
             // 7a. Roof Ceiling Deck Planks
             var roofLeft = GameObject.CreatePrimitive(PrimitiveType.Cube);
@@ -325,7 +343,7 @@ namespace EndlessHallway.Editor
 
             // 7b. Central Longitudinal Ridge Beam at Apex
             CreateStaticBox(roofGroup.transform, "Ridge_Beam",
-                new Vector3(0.0f, apexY - 0.09f, roomMidZ),
+                new Vector3(0.0f, apexY - 0.12f, roomMidZ),
                 new Vector3(0.24f, 0.24f, roomLen + 0.04f), rafterMat);
 
             // 7c. Structural Timber Rafters (7 bays along Z)
@@ -357,19 +375,19 @@ namespace EndlessHallway.Editor
                 rR.GetComponent<Renderer>().sharedMaterial = rafterMat;
                 SetStaticFlags(rR);
 
-                // Horizontal Collar Tie Beam (Connecting left and right rafters at Y = 4.90m)
+                // Horizontal Collar Tie Beam (Connecting left and right rafters high up at Y = 7.10m for ample headroom)
                 CreateStaticBox(raftersGroup.transform, $"CollarTie_{b}",
-                    new Vector3(0f, 4.90f, z),
-                    new Vector3(2.40f, 0.16f, 0.14f), rafterMat);
+                    new Vector3(0f, 7.10f, z),
+                    new Vector3(1.55f, 0.14f, 0.12f), rafterMat);
             }
 
             // 7d. Longitudinal Purlin Beams
             CreateStaticBox(roofGroup.transform, "Purlin_Left",
-                new Vector3(-1.60f, 4.60f, roomMidZ),
+                new Vector3(-1.60f, midSlopeY, roomMidZ),
                 new Vector3(0.14f, 0.14f, roomLen), rafterMat);
 
             CreateStaticBox(roofGroup.transform, "Purlin_Right",
-                new Vector3(1.60f, 4.60f, roomMidZ),
+                new Vector3(1.60f, midSlopeY, roomMidZ),
                 new Vector3(0.14f, 0.14f, roomLen), rafterMat);
 
             // 8. Watertight Gable Walls (North Z = 31.70m, South Z = 24.00m)
@@ -387,10 +405,10 @@ namespace EndlessHallway.Editor
             float chimX = 0.0f;
             float chimZ = 31.35f;
 
-            // 9a. Chimney Breast Shaft (Starting above mantel at Y = 3.95m rising to apex 5.95m)
+            // 9a. Chimney Breast Shaft (Starting above mantel at Y = 4.00m rising to apex 8.10m)
             CreateStaticBox(chimneyGroup.transform, "Chimney_Shaft",
-                new Vector3(chimX, 4.95f, chimZ),
-                new Vector3(1.80f, 2.00f, 0.60f), stoneMat);
+                new Vector3(chimX, 6.05f, chimZ),
+                new Vector3(1.80f, 4.10f, 0.60f), stoneMat);
 
             // 9b. Fireplace Hearth Surround Pillars
             CreateStaticBox(chimneyGroup.transform, "Hearth_Pillar_Left",
@@ -491,26 +509,10 @@ namespace EndlessHallway.Editor
             // 11c. Right Balustrade (along X = +0.70m)
             BuildLongRailing(railingGroup.transform, "Railing_Right", railRightX, railFrontZ, railBackZ, floorY, railH, shoeY, rafterMat);
 
-            // 11d. South Cross-Railing (along Z = 24.65m between left and right posts)
-            CreateStaticBox(railingGroup.transform, "ShoeRail_South",
-                new Vector3(0.0f, shoeY, railFrontZ),
-                new Vector3(crossRailW - 0.12f, 0.06f, 0.06f), rafterMat);
-
-            CreateStaticBox(railingGroup.transform, "Handrail_South",
-                new Vector3(0.0f, railY, railFrontZ),
-                new Vector3(crossRailW - 0.12f, 0.08f, 0.08f), rafterMat);
-
-            int numSouthBalusters = 7;
-            float southBalStep = (crossRailW - 0.20f) / (numSouthBalusters + 1);
-            for (int s = 1; s <= numSouthBalusters; s++)
-            {
-                float bX = railLeftX + 0.10f + (s * southBalStep);
-                CreateStaticBox(railingGroup.transform, $"Baluster_South_{s}",
-                    new Vector3(bX, floorY + (railH / 2f), railFrontZ),
-                    new Vector3(0.038f, railH + 0.04f, 0.038f), rafterMat);
-            }
-
-            // Fall-prevention Box Colliders on all 3 closed sides
+            // 11d. Foreground Stair Entrance
+            // Open between SouthLeft and SouthRight newel posts as depicted in the concept art,
+            // providing an unobstructed entrance and infinite vertical headroom.
+            // Fall-prevention Box Colliders on the left and right side walkways:
             var leftBarrier = railingGroup.AddComponent<BoxCollider>();
             leftBarrier.center = new Vector3(railLeftX, floorY + 0.60f, longRailMidZ);
             leftBarrier.size = new Vector3(0.15f, 1.20f, longRailLen);
@@ -519,27 +521,25 @@ namespace EndlessHallway.Editor
             rightBarrier.center = new Vector3(railRightX, floorY + 0.60f, longRailMidZ);
             rightBarrier.size = new Vector3(0.15f, 1.20f, longRailLen);
 
-            var southBarrier = railingGroup.AddComponent<BoxCollider>();
-            southBarrier.center = new Vector3(0.0f, floorY + 0.60f, railFrontZ);
-            southBarrier.size = new Vector3(crossRailW, 1.20f, 0.15f);
-
-            // 11e. Inner Stairwell Handrails (attached inside the stair opening as seen in reference image)
+            // 11e. Inner Stairwell Handrails (attached along the stringers inside the stair opening)
             var handrailInL = GameObject.CreatePrimitive(PrimitiveType.Cube);
             handrailInL.name = "InnerHandrail_Left";
             handrailInL.transform.SetParent(stairsGroup.transform, false);
             handrailInL.transform.position = new Vector3(-stairWidth / 2f + 0.04f, stringerMidY + 0.70f, stringerMidZ);
-            handrailInL.transform.rotation = Quaternion.Euler(stairAngle, 0f, 0f);
+            handrailInL.transform.rotation = Quaternion.Euler(-stairAngle, 0f, 0f);
             handrailInL.transform.localScale = new Vector3(0.05f, 0.07f, stringerLen);
             handrailInL.GetComponent<Renderer>().sharedMaterial = rafterMat;
+            UnityEngine.Object.DestroyImmediate(handrailInL.GetComponent<Collider>());
             SetStaticFlags(handrailInL);
 
             var handrailInR = GameObject.CreatePrimitive(PrimitiveType.Cube);
             handrailInR.name = "InnerHandrail_Right";
             handrailInR.transform.SetParent(stairsGroup.transform, false);
             handrailInR.transform.position = new Vector3(stairWidth / 2f - 0.04f, stringerMidY + 0.70f, stringerMidZ);
-            handrailInR.transform.rotation = Quaternion.Euler(stairAngle, 0f, 0f);
+            handrailInR.transform.rotation = Quaternion.Euler(-stairAngle, 0f, 0f);
             handrailInR.transform.localScale = new Vector3(0.05f, 0.07f, stringerLen);
             handrailInR.GetComponent<Renderer>().sharedMaterial = rafterMat;
+            UnityEngine.Object.DestroyImmediate(handrailInR.GetComponent<Collider>());
             SetStaticFlags(handrailInR);
 
             // 12. Set Dressing Props (Shelves, Desk, Chair on Left Path; Crate, Rug on Right Path)
@@ -574,13 +574,13 @@ namespace EndlessHallway.Editor
             lightingGroup.transform.SetParent(atticRoot.transform, false);
 
             // 13a. Central Hanging Lantern directly above the head of the stairwell/North landing
-            Vector3 lanternPos = new Vector3(0.0f, 4.35f, 28.50f);
+            Vector3 lanternPos = new Vector3(0.0f, 6.05f, 28.50f);
 
             var cord = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
             cord.name = "Lantern_Cord";
             cord.transform.SetParent(lightingGroup.transform, false);
-            cord.transform.position = new Vector3(0.0f, 5.10f, 28.50f);
-            cord.transform.localScale = new Vector3(0.03f, 0.65f, 0.03f);
+            cord.transform.position = new Vector3(0.0f, 7.00f, 28.50f);
+            cord.transform.localScale = new Vector3(0.03f, 1.60f, 0.03f);
             var cordRend = cord.GetComponent<Renderer>();
             cordRend.sharedMaterial = lanternMetal;
             cordRend.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
@@ -590,7 +590,7 @@ namespace EndlessHallway.Editor
             var cap = GameObject.CreatePrimitive(PrimitiveType.Cube);
             cap.name = "Lantern_Cap";
             cap.transform.SetParent(lightingGroup.transform, false);
-            cap.transform.position = new Vector3(0.0f, 4.68f, 28.50f);
+            cap.transform.position = new Vector3(0.0f, 6.36f, 28.50f);
             cap.transform.localScale = new Vector3(0.32f, 0.08f, 0.32f);
             var capRend = cap.GetComponent<Renderer>();
             capRend.sharedMaterial = lanternMetal;
@@ -601,7 +601,7 @@ namespace EndlessHallway.Editor
             var glass = GameObject.CreatePrimitive(PrimitiveType.Cube);
             glass.name = "Lantern_Glass";
             glass.transform.SetParent(lightingGroup.transform, false);
-            glass.transform.position = new Vector3(0.0f, 4.52f, 28.50f);
+            glass.transform.position = new Vector3(0.0f, 6.20f, 28.50f);
             glass.transform.localScale = new Vector3(0.24f, 0.26f, 0.24f);
             var glassRend = glass.GetComponent<Renderer>();
             glassRend.sharedMaterial = lanternGlass;
@@ -616,8 +616,8 @@ namespace EndlessHallway.Editor
             var pointLgt = lgtObj.AddComponent<Light>();
             pointLgt.type = LightType.Point;
             pointLgt.color = new Color(1.0f, 0.80f, 0.50f); // 2700K warm
-            pointLgt.intensity = 4.8f;
-            pointLgt.range = 10.5f;
+            pointLgt.intensity = 6.0f;
+            pointLgt.range = 15.0f;
             pointLgt.shadows = LightShadows.Soft;
 
             // 13b. Distant Hallway Beacon Light (Far down at the bottom of stairs, Z = 2.5m)
@@ -885,7 +885,7 @@ namespace EndlessHallway.Editor
             }
         }
 
-        private static GameObject CreateStaticBox(Transform parent, string name, Vector3 pos, Vector3 scale, Material mat)
+        private static GameObject CreateStaticBox(Transform parent, string name, Vector3 pos, Vector3 scale, Material mat, bool withCollider = true)
         {
             var box = GameObject.CreatePrimitive(PrimitiveType.Cube);
             box.name = name;
@@ -893,6 +893,10 @@ namespace EndlessHallway.Editor
             box.transform.position = pos;
             box.transform.localScale = scale;
             if (mat != null) box.GetComponent<Renderer>().sharedMaterial = mat;
+            if (!withCollider)
+            {
+                UnityEngine.Object.DestroyImmediate(box.GetComponent<Collider>());
+            }
             SetStaticFlags(box);
             return box;
         }
