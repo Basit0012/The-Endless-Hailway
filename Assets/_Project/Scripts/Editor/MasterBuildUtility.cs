@@ -2279,23 +2279,24 @@ namespace EndlessHallway.Editor
             var pBtnContainer = new GameObject("ButtonsGroup");
             pBtnContainer.transform.SetParent(pausePanel.transform, false);
             var pbcRect = pBtnContainer.AddComponent<RectTransform>();
-            pbcRect.anchorMin = new Vector2(0.36f, 0.16f);
-            pbcRect.anchorMax = new Vector2(0.64f, 0.60f);
+            pbcRect.anchorMin = new Vector2(0.28f, 0.12f);
+            pbcRect.anchorMax = new Vector2(0.72f, 0.64f);
             pbcRect.offsetMin = Vector2.zero;
             pbcRect.offsetMax = Vector2.zero;
             var pbcLayout = pBtnContainer.AddComponent<VerticalLayoutGroup>();
-            pbcLayout.spacing = 14f;
+            pbcLayout.spacing = 16f;
+            pbcLayout.padding = new RectOffset(16, 16, 16, 16);
             pbcLayout.childAlignment = TextAnchor.MiddleCenter;
             pbcLayout.childControlWidth = true;
             pbcLayout.childControlHeight = true;
             pbcLayout.childForceExpandWidth = true;
             pbcLayout.childForceExpandHeight = false;
 
-            var resumeBtn = CreateButtonWidget(pBtnContainer.transform, "ResumeButton", "RESUME", new Vector2(320, 48));
-            var pSettingsBtn = CreateButtonWidget(pBtnContainer.transform, "SettingsButton", "SETTINGS & ACCESSIBILITY", new Vector2(320, 48));
-            var restartBtn = CreateButtonWidget(pBtnContainer.transform, "RestartLoopButton", "RESTART CURRENT LOOP", new Vector2(320, 48));
-            var quitMainMenuBtn = CreateButtonWidget(pBtnContainer.transform, "QuitMainMenuButton", "QUIT TO MAIN MENU", new Vector2(320, 48));
-            var quitBtn = CreateButtonWidget(pBtnContainer.transform, "QuitGameButton", "QUIT TO DESKTOP", new Vector2(320, 48));
+            var resumeBtn = CreateButtonWidget(pBtnContainer.transform, "ResumeButton", "RESUME", new Vector2(440, 54));
+            var pSettingsBtn = CreateButtonWidget(pBtnContainer.transform, "SettingsButton", "SETTINGS & ACCESSIBILITY", new Vector2(440, 54));
+            var restartBtn = CreateButtonWidget(pBtnContainer.transform, "RestartLoopButton", "RESTART CURRENT LOOP", new Vector2(440, 54));
+            var quitMainMenuBtn = CreateButtonWidget(pBtnContainer.transform, "QuitMainMenuButton", "QUIT TO MAIN MENU", new Vector2(440, 54));
+            var quitBtn = CreateButtonWidget(pBtnContainer.transform, "QuitGameButton", "QUIT TO DESKTOP", new Vector2(440, 54));
 
             var pauseUI = pausePanel.AddComponent<PauseMenuUI>();
             SetField(pauseUI, "pausePanel", pausePanel);
@@ -2333,58 +2334,63 @@ namespace EndlessHallway.Editor
             menuRect.offsetMax = Vector2.zero;
 
             var menuBg = menuPanel.AddComponent<Image>();
-            menuBg.color = new Color(0.04f, 0.05f, 0.07f, 0.96f);
+            menuBg.color = new Color(0.02f, 0.03f, 0.05f, 0.40f);
 
             // Title
             var titleObj = new GameObject("Title");
             titleObj.transform.SetParent(menuPanel.transform, false);
             var titleRect = titleObj.AddComponent<RectTransform>();
-            titleRect.anchorMin = new Vector2(0.1f, 0.68f);
-            titleRect.anchorMax = new Vector2(0.9f, 0.86f);
+            titleRect.anchorMin = new Vector2(0.1f, 0.74f);
+            titleRect.anchorMax = new Vector2(0.9f, 0.90f);
             titleRect.offsetMin = Vector2.zero;
             titleRect.offsetMax = Vector2.zero;
             var titleTmp = titleObj.AddComponent<TextMeshProUGUI>();
             titleTmp.text = "THE ENDLESS HALLWAY";
-            titleTmp.fontSize = 44f;
+            titleTmp.fontSize = 48f;
             titleTmp.fontStyle = FontStyles.Bold;
+            titleTmp.characterSpacing = 8f;
             titleTmp.color = new Color(0.96f, 0.92f, 0.78f, 1f);
             titleTmp.alignment = TextAlignmentOptions.Center;
+            titleTmp.raycastTarget = false;
 
             // Subtitle
             var subObj = new GameObject("Subtitle");
             subObj.transform.SetParent(menuPanel.transform, false);
             var subRect = subObj.AddComponent<RectTransform>();
-            subRect.anchorMin = new Vector2(0.1f, 0.62f);
-            subRect.anchorMax = new Vector2(0.9f, 0.68f);
+            subRect.anchorMin = new Vector2(0.1f, 0.68f);
+            subRect.anchorMax = new Vector2(0.9f, 0.74f);
             subRect.offsetMin = Vector2.zero;
             subRect.offsetMax = Vector2.zero;
             var subTmp = subObj.AddComponent<TextMeshProUGUI>();
             subTmp.text = "MARROW POINT RESIDENCES // APARTMENT 214 INQUEST";
             subTmp.fontSize = 16f;
+            subTmp.characterSpacing = 6f;
             subTmp.color = new Color(0.55f, 0.68f, 0.70f, 1f);
             subTmp.alignment = TextAlignmentOptions.Center;
+            subTmp.raycastTarget = false;
 
             // Button Container
             var btnContainer = new GameObject("ButtonsGroup");
             btnContainer.transform.SetParent(menuPanel.transform, false);
             var bcRect = btnContainer.AddComponent<RectTransform>();
-            bcRect.anchorMin = new Vector2(0.35f, 0.12f);
-            bcRect.anchorMax = new Vector2(0.65f, 0.58f);
+            bcRect.anchorMin = new Vector2(0.26f, 0.10f);
+            bcRect.anchorMax = new Vector2(0.74f, 0.64f);
             bcRect.offsetMin = Vector2.zero;
             bcRect.offsetMax = Vector2.zero;
             var bcLayout = btnContainer.AddComponent<VerticalLayoutGroup>();
-            bcLayout.spacing = 14f;
+            bcLayout.spacing = 16f;
+            bcLayout.padding = new RectOffset(16, 16, 16, 16);
             bcLayout.childAlignment = TextAnchor.MiddleCenter;
             bcLayout.childControlWidth = true;
             bcLayout.childControlHeight = true;
             bcLayout.childForceExpandWidth = true;
             bcLayout.childForceExpandHeight = false;
 
-            var contBtn = CreateButtonWidget(btnContainer.transform, "ContinueButton", "CONTINUE", new Vector2(340, 48));
-            var newGameBtn = CreateButtonWidget(btnContainer.transform, "NewGameButton", "NEW GAME", new Vector2(340, 48));
-            var settBtn = CreateButtonWidget(btnContainer.transform, "SettingsButton", "SETTINGS & ACCESSIBILITY", new Vector2(340, 48));
-            var credBtn = CreateButtonWidget(btnContainer.transform, "CreditsButton", "CREDITS", new Vector2(340, 48));
-            var quitBtn = CreateButtonWidget(btnContainer.transform, "QuitButton", "QUIT TO DESKTOP", new Vector2(340, 48));
+            var contBtn = CreateButtonWidget(btnContainer.transform, "ContinueButton", "CONTINUE", new Vector2(460, 56));
+            var newGameBtn = CreateButtonWidget(btnContainer.transform, "NewGameButton", "NEW GAME", new Vector2(460, 56));
+            var settBtn = CreateButtonWidget(btnContainer.transform, "SettingsButton", "SETTINGS & ACCESSIBILITY", new Vector2(460, 56));
+            var credBtn = CreateButtonWidget(btnContainer.transform, "CreditsButton", "CREDITS", new Vector2(460, 56));
+            var quitBtn = CreateButtonWidget(btnContainer.transform, "QuitButton", "QUIT TO DESKTOP", new Vector2(460, 56));
 
             // 2. Build Credits Panel
             var oldCredits = canvasObj.transform.Find("CreditsPanel");
@@ -2620,36 +2626,90 @@ namespace EndlessHallway.Editor
 
         private static Button CreateButtonWidget(Transform parent, string name, string labelText, Vector2 size)
         {
+            var btnNormalSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Project/Art/UI/spr_ui_button_normal.png");
+            var btnHoverSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Project/Art/UI/spr_ui_button_hover.png");
+            var btnPressedSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Project/Art/UI/spr_ui_button_pressed.png");
+            var btnDisabledSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Project/Art/UI/spr_ui_button_disabled.png");
+            var hoverClip = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/_Project/Audio/ui_hover.wav");
+            var clickClip = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/_Project/Audio/ui_click.wav");
+
             var btnObj = new GameObject(name);
             btnObj.transform.SetParent(parent, false);
+
             var rect = btnObj.AddComponent<RectTransform>();
             rect.sizeDelta = size;
 
+            var le = btnObj.AddComponent<LayoutElement>();
+            le.minWidth = size.x * 0.9f;
+            le.preferredWidth = size.x;
+            le.minHeight = size.y;
+            le.preferredHeight = size.y;
+            le.flexibleWidth = 1f;
+            le.flexibleHeight = 0f;
+
             var img = btnObj.AddComponent<Image>();
-            img.color = new Color(0.14f, 0.18f, 0.22f, 1f);
+            if (btnNormalSprite != null)
+            {
+                img.sprite = btnNormalSprite;
+                img.type = Image.Type.Sliced;
+                img.color = Color.white;
+            }
+            else
+            {
+                img.color = new Color(0.12f, 0.16f, 0.20f, 0.95f);
+            }
+            img.raycastTarget = true; // Essential: button must intercept raycasts!
 
             var btn = btnObj.AddComponent<Button>();
-            var colors = btn.colors;
-            colors.normalColor = new Color(0.14f, 0.18f, 0.22f, 1f);
-            colors.highlightedColor = new Color(0.28f, 0.35f, 0.40f, 1f);
-            colors.pressedColor = new Color(0.08f, 0.10f, 0.12f, 1f);
-            colors.selectedColor = new Color(0.22f, 0.28f, 0.32f, 1f);
-            btn.colors = colors;
+            btn.targetGraphic = img;
+
+            if (btnHoverSprite != null && btnPressedSprite != null)
+            {
+                btn.transition = Selectable.Transition.SpriteSwap;
+                var ss = btn.spriteState;
+                ss.highlightedSprite = btnHoverSprite;
+                ss.pressedSprite = btnPressedSprite;
+                ss.selectedSprite = btnHoverSprite;
+                ss.disabledSprite = btnDisabledSprite;
+                btn.spriteState = ss;
+            }
+            else
+            {
+                btn.transition = Selectable.Transition.ColorTint;
+                var colors = btn.colors;
+                colors.normalColor = new Color(0.14f, 0.18f, 0.22f, 1f);
+                colors.highlightedColor = new Color(0.32f, 0.40f, 0.48f, 1f);
+                colors.pressedColor = new Color(0.08f, 0.10f, 0.12f, 1f);
+                colors.selectedColor = new Color(0.24f, 0.30f, 0.36f, 1f);
+                colors.disabledColor = new Color(0.08f, 0.09f, 0.10f, 0.45f);
+                colors.colorMultiplier = 1f;
+                colors.fadeDuration = 0.08f;
+                btn.colors = colors;
+            }
 
             var txtObj = new GameObject("Text");
             txtObj.transform.SetParent(btnObj.transform, false);
             var txtRect = txtObj.AddComponent<RectTransform>();
             txtRect.anchorMin = Vector2.zero;
             txtRect.anchorMax = Vector2.one;
-            txtRect.offsetMin = Vector2.zero;
-            txtRect.offsetMax = Vector2.zero;
+            txtRect.offsetMin = new Vector2(16f, 4f);
+            txtRect.offsetMax = new Vector2(-16f, -4f);
 
             var tmp = txtObj.AddComponent<TextMeshProUGUI>();
             tmp.text = labelText;
-            tmp.fontSize = 16f;
+            tmp.fontSize = 20f;
             tmp.fontStyle = FontStyles.Bold;
-            tmp.color = new Color(0.92f, 0.90f, 0.84f, 1f);
+            tmp.characterSpacing = 8f;
+            tmp.color = new Color(0.95f, 0.93f, 0.85f, 1f);
             tmp.alignment = TextAlignmentOptions.Center;
+            tmp.raycastTarget = false; // CRITICAL: must be false so raycast reaches button!
+
+            var retroEffect = btnObj.AddComponent<RetroButtonEffect>();
+            if (retroEffect != null)
+            {
+                retroEffect.SetOriginalText(labelText);
+                retroEffect.SetAudioClips(hoverClip, clickClip);
+            }
 
             return btn;
         }

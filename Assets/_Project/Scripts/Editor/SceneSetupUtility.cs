@@ -391,41 +391,60 @@ namespace EndlessHallway.Editor
             elevatorRoot.transform.SetParent(envRoot.transform);
             elevatorRoot.transform.position = new Vector3(0f, 0f, 0f);
 
+            // Instantiate authentic USSR Elevator Entrance Model
+            GameObject ussrAsset = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/old_ussr_elevator_entrance.glb");
+            if (ussrAsset != null)
+            {
+                GameObject ussrInstance = (GameObject)PrefabUtility.InstantiatePrefab(ussrAsset);
+                if (ussrInstance == null) ussrInstance = GameObject.Instantiate(ussrAsset);
+                ussrInstance.name = "Elevator_USSR_Entrance";
+                ussrInstance.transform.SetParent(elevatorRoot.transform, false);
+                ussrInstance.transform.localPosition = new Vector3(0f, 0f, 0.05f);
+                ussrInstance.transform.localRotation = Quaternion.Euler(0f, 180f, 0f);
+                ussrInstance.transform.localScale = new Vector3(1.35f, 1.35f, 1.35f);
+            }
+
+            Material ussrDoorMat = AssetDatabase.LoadAssetAtPath<Material>("Assets/_Project/Materials/Elevator/lift_Material_u1_v1.mat");
+            if (ussrDoorMat == null) ussrDoorMat = metalMat;
+
+            Material ussrPanelMat = AssetDatabase.LoadAssetAtPath<Material>("Assets/_Project/Materials/Elevator/lift_Material_u2_v1.mat");
+            if (ussrPanelMat == null) ussrPanelMat = metalMat;
+
             // Elevator Cabin
             GameObject cabinFloor = GameObject.CreatePrimitive(PrimitiveType.Cube);
             cabinFloor.name = "Cabin_Floor";
             cabinFloor.transform.SetParent(elevatorRoot.transform);
             cabinFloor.transform.position = new Vector3(0f, -0.05f, -1.3f);
             cabinFloor.transform.localScale = new Vector3(2.2f, 0.1f, 2.4f);
-            cabinFloor.GetComponent<Renderer>().sharedMaterial = interiorMat;
+            cabinFloor.GetComponent<Renderer>().sharedMaterial = ussrPanelMat;
 
             GameObject cabinCeiling = GameObject.CreatePrimitive(PrimitiveType.Cube);
             cabinCeiling.name = "Cabin_Ceiling";
             cabinCeiling.transform.SetParent(elevatorRoot.transform);
             cabinCeiling.transform.position = new Vector3(0f, hallHeight + 0.05f, -1.3f);
             cabinCeiling.transform.localScale = new Vector3(2.2f, 0.1f, 2.4f);
-            cabinCeiling.GetComponent<Renderer>().sharedMaterial = interiorMat;
+            cabinCeiling.GetComponent<Renderer>().sharedMaterial = ussrPanelMat;
 
             GameObject cabinBack = GameObject.CreatePrimitive(PrimitiveType.Cube);
             cabinBack.name = "Cabin_BackWall";
             cabinBack.transform.SetParent(elevatorRoot.transform);
             cabinBack.transform.position = new Vector3(0f, hallHeight / 2f, -2.55f);
             cabinBack.transform.localScale = new Vector3(2.2f, hallHeight, 0.1f);
-            cabinBack.GetComponent<Renderer>().sharedMaterial = interiorMat;
+            cabinBack.GetComponent<Renderer>().sharedMaterial = ussrPanelMat;
 
             GameObject cabinLeft = GameObject.CreatePrimitive(PrimitiveType.Cube);
             cabinLeft.name = "Cabin_LeftWall";
             cabinLeft.transform.SetParent(elevatorRoot.transform);
             cabinLeft.transform.position = new Vector3(-1.15f, hallHeight / 2f, -1.3f);
             cabinLeft.transform.localScale = new Vector3(0.1f, hallHeight, 2.4f);
-            cabinLeft.GetComponent<Renderer>().sharedMaterial = interiorMat;
+            cabinLeft.GetComponent<Renderer>().sharedMaterial = ussrPanelMat;
 
             GameObject cabinRight = GameObject.CreatePrimitive(PrimitiveType.Cube);
             cabinRight.name = "Cabin_RightWall";
             cabinRight.transform.SetParent(elevatorRoot.transform);
             cabinRight.transform.position = new Vector3(1.15f, hallHeight / 2f, -1.3f);
             cabinRight.transform.localScale = new Vector3(0.1f, hallHeight, 2.4f);
-            cabinRight.GetComponent<Renderer>().sharedMaterial = interiorMat;
+            cabinRight.GetComponent<Renderer>().sharedMaterial = ussrPanelMat;
 
             // Elevator light
             GameObject elevLightObj = new GameObject("ElevatorLight");
@@ -433,9 +452,9 @@ namespace EndlessHallway.Editor
             elevLightObj.transform.position = new Vector3(0f, hallHeight - 0.2f, -1.3f);
             Light elevLight = elevLightObj.AddComponent<Light>();
             elevLight.type = LightType.Point;
-            elevLight.range = 5f;
-            elevLight.intensity = 1.0f;
-            elevLight.color = new Color(0.9f, 0.95f, 1.0f);
+            elevLight.range = 5.5f;
+            elevLight.intensity = 1.2f;
+            elevLight.color = new Color(1.0f, 0.85f, 0.65f); // Warm vintage incandescent
 
             // Sliding Doors (Z = 0)
             GameObject leftDoor = GameObject.CreatePrimitive(PrimitiveType.Cube);
@@ -443,14 +462,14 @@ namespace EndlessHallway.Editor
             leftDoor.transform.SetParent(elevatorRoot.transform);
             leftDoor.transform.position = new Vector3(-1.45f, 1.15f, 0.05f);
             leftDoor.transform.localScale = new Vector3(1.1f, 2.3f, 0.06f);
-            leftDoor.GetComponent<Renderer>().sharedMaterial = metalMat;
+            leftDoor.GetComponent<Renderer>().sharedMaterial = ussrDoorMat;
 
             GameObject rightDoor = GameObject.CreatePrimitive(PrimitiveType.Cube);
             rightDoor.name = "ElevatorDoor_Right";
             rightDoor.transform.SetParent(elevatorRoot.transform);
             rightDoor.transform.position = new Vector3(1.45f, 1.15f, 0.05f);
             rightDoor.transform.localScale = new Vector3(1.1f, 2.3f, 0.06f);
-            rightDoor.GetComponent<Renderer>().sharedMaterial = metalMat;
+            rightDoor.GetComponent<Renderer>().sharedMaterial = ussrDoorMat;
 
             // Elevator Button / Control Panel
             GameObject buttonPanel = GameObject.CreatePrimitive(PrimitiveType.Cube);
@@ -458,7 +477,7 @@ namespace EndlessHallway.Editor
             buttonPanel.transform.SetParent(elevatorRoot.transform);
             buttonPanel.transform.position = new Vector3(0.95f, 1.2f, -0.6f);
             buttonPanel.transform.localScale = new Vector3(0.06f, 0.35f, 0.2f);
-            buttonPanel.GetComponent<Renderer>().sharedMaterial = metalMat;
+            buttonPanel.GetComponent<Renderer>().sharedMaterial = ussrPanelMat;
 
             // Spawn point inside elevator
             GameObject spawnPtObj = new GameObject("PlayerSpawnPoint_Elevator");

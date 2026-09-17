@@ -293,14 +293,14 @@ namespace EndlessHallway.Editor
                 new Vector3(0.0f, 2.50f, roomMinZ),
                 new Vector3(1.20f, 0.60f, 0.12f), wallMat);
 
-            // 6. Perimeter Knee-Walls (from floorY 2.80m up to 4.10m, height 1.30m)
+            // 6. Perimeter Knee-Walls (from floorY 2.80m up to 4.90m, height 2.10m for full upright character clearance)
             GameObject kneeGroup = new GameObject("Walls_Knee");
             kneeGroup.transform.SetParent(atticRoot.transform, false);
 
-            float apexY = 8.00f;
-            float kneeY = 4.10f;
-            float kneeH = kneeY - floorY; // 1.30m
-            float kneeMidY = (floorY + kneeY) / 2f; // 3.45m
+            float apexY = 8.80f;
+            float kneeY = 4.90f;
+            float kneeH = kneeY - floorY; // 2.10m
+            float kneeMidY = (floorY + kneeY) / 2f; // 3.85m
 
             CreateStaticBox(kneeGroup.transform, "KneeWall_West",
                 new Vector3(-roomHalfW, kneeMidY, roomMidZ),
@@ -310,8 +310,8 @@ namespace EndlessHallway.Editor
                 new Vector3(roomHalfW, kneeMidY, roomMidZ),
                 new Vector3(0.12f, kneeH, roomLen), wallMat);
 
-            // 7. Pitched Beam Ceiling (Cathedral A-Frame Architecture)
-            // Apex at X = 0.0m, Y = 8.00m. Knee at X = ±3.20m, Y = 4.10m.
+            // 7. Pitched Beam Ceiling (Cathedral A-Frame Architecture with High Headroom)
+            // Apex at X = 0.0m, Y = 8.80m. Knee at X = ±3.20m, Y = 4.90m.
             // Rise = 3.90m, Run = 3.20m, Angle ≈ 50.6°
             GameObject roofGroup = new GameObject("Pitched_Roof");
             roofGroup.transform.SetParent(atticRoot.transform, false);
@@ -320,7 +320,7 @@ namespace EndlessHallway.Editor
             float run = roomHalfW;      // 3.20m
             float roofSlopeLen = Mathf.Sqrt(rise * rise + run * run) + 0.20f; // ~5.25m
             float pitchAngle = Mathf.Atan2(rise, run) * Mathf.Rad2Deg; // 50.63°
-            float midSlopeY = (apexY + kneeY) / 2f; // 6.05m
+            float midSlopeY = (apexY + kneeY) / 2f; // 6.85m
 
             // 7a. Roof Ceiling Deck Planks
             var roofLeft = GameObject.CreatePrimitive(PrimitiveType.Cube);
@@ -330,6 +330,7 @@ namespace EndlessHallway.Editor
             roofLeft.transform.rotation = Quaternion.Euler(0f, 0f, pitchAngle);
             roofLeft.transform.localScale = new Vector3(roofSlopeLen, 0.12f, roomLen + 0.04f);
             roofLeft.GetComponent<Renderer>().sharedMaterial = wallMat;
+            UnityEngine.Object.DestroyImmediate(roofLeft.GetComponent<Collider>());
             SetStaticFlags(roofLeft);
 
             var roofRight = GameObject.CreatePrimitive(PrimitiveType.Cube);
@@ -339,12 +340,13 @@ namespace EndlessHallway.Editor
             roofRight.transform.rotation = Quaternion.Euler(0f, 0f, -pitchAngle);
             roofRight.transform.localScale = new Vector3(roofSlopeLen, 0.12f, roomLen + 0.04f);
             roofRight.GetComponent<Renderer>().sharedMaterial = wallMat;
+            UnityEngine.Object.DestroyImmediate(roofRight.GetComponent<Collider>());
             SetStaticFlags(roofRight);
 
             // 7b. Central Longitudinal Ridge Beam at Apex
             CreateStaticBox(roofGroup.transform, "Ridge_Beam",
                 new Vector3(0.0f, apexY - 0.12f, roomMidZ),
-                new Vector3(0.24f, 0.24f, roomLen + 0.04f), rafterMat);
+                new Vector3(0.24f, 0.24f, roomLen + 0.04f), rafterMat, false);
 
             // 7c. Structural Timber Rafters (7 bays along Z)
             float[] rafterZs = new float[] { 24.20f, 25.40f, 26.65f, 27.85f, 29.10f, 30.35f, 31.55f };
@@ -363,6 +365,7 @@ namespace EndlessHallway.Editor
                 rL.transform.rotation = Quaternion.Euler(0f, 0f, pitchAngle);
                 rL.transform.localScale = new Vector3(roofSlopeLen - 0.06f, 0.18f, 0.16f);
                 rL.GetComponent<Renderer>().sharedMaterial = rafterMat;
+                UnityEngine.Object.DestroyImmediate(rL.GetComponent<Collider>());
                 SetStaticFlags(rL);
 
                 // Right Rafter
@@ -373,22 +376,23 @@ namespace EndlessHallway.Editor
                 rR.transform.rotation = Quaternion.Euler(0f, 0f, -pitchAngle);
                 rR.transform.localScale = new Vector3(roofSlopeLen - 0.06f, 0.18f, 0.16f);
                 rR.GetComponent<Renderer>().sharedMaterial = rafterMat;
+                UnityEngine.Object.DestroyImmediate(rR.GetComponent<Collider>());
                 SetStaticFlags(rR);
 
-                // Horizontal Collar Tie Beam (Connecting left and right rafters high up at Y = 7.10m for ample headroom)
+                // Horizontal Collar Tie Beam (High up at Y = 7.90m for generous headroom)
                 CreateStaticBox(raftersGroup.transform, $"CollarTie_{b}",
-                    new Vector3(0f, 7.10f, z),
-                    new Vector3(1.55f, 0.14f, 0.12f), rafterMat);
+                    new Vector3(0f, 7.90f, z),
+                    new Vector3(1.55f, 0.14f, 0.12f), rafterMat, false);
             }
 
-            // 7d. Longitudinal Purlin Beams
+            // 7d. Longitudinal Purlin Beams (Visual only - no headroom blocking colliders)
             CreateStaticBox(roofGroup.transform, "Purlin_Left",
                 new Vector3(-1.60f, midSlopeY, roomMidZ),
-                new Vector3(0.14f, 0.14f, roomLen), rafterMat);
+                new Vector3(0.14f, 0.14f, roomLen), rafterMat, false);
 
             CreateStaticBox(roofGroup.transform, "Purlin_Right",
                 new Vector3(1.60f, midSlopeY, roomMidZ),
-                new Vector3(0.14f, 0.14f, roomLen), rafterMat);
+                new Vector3(0.14f, 0.14f, roomLen), rafterMat, false);
 
             // 8. Watertight Gable Walls (North Z = 31.70m, South Z = 24.00m)
             GameObject gableGroup = new GameObject("Gable_Walls");
@@ -405,10 +409,10 @@ namespace EndlessHallway.Editor
             float chimX = 0.0f;
             float chimZ = 31.35f;
 
-            // 9a. Chimney Breast Shaft (Starting above mantel at Y = 4.00m rising to apex 8.10m)
+            // 9a. Chimney Breast Shaft (Starting above mantel at Y = 4.00m rising to raised apex 8.90m)
             CreateStaticBox(chimneyGroup.transform, "Chimney_Shaft",
-                new Vector3(chimX, 6.05f, chimZ),
-                new Vector3(1.80f, 4.10f, 0.60f), stoneMat);
+                new Vector3(chimX, 6.45f, chimZ),
+                new Vector3(1.80f, 4.90f, 0.60f), stoneMat);
 
             // 9b. Fireplace Hearth Surround Pillars
             CreateStaticBox(chimneyGroup.transform, "Hearth_Pillar_Left",
@@ -574,12 +578,12 @@ namespace EndlessHallway.Editor
             lightingGroup.transform.SetParent(atticRoot.transform, false);
 
             // 13a. Central Hanging Lantern directly above the head of the stairwell/North landing
-            Vector3 lanternPos = new Vector3(0.0f, 6.05f, 28.50f);
+            Vector3 lanternPos = new Vector3(0.0f, 6.75f, 28.50f);
 
             var cord = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
             cord.name = "Lantern_Cord";
             cord.transform.SetParent(lightingGroup.transform, false);
-            cord.transform.position = new Vector3(0.0f, 7.00f, 28.50f);
+            cord.transform.position = new Vector3(0.0f, 7.70f, 28.50f);
             cord.transform.localScale = new Vector3(0.03f, 1.60f, 0.03f);
             var cordRend = cord.GetComponent<Renderer>();
             cordRend.sharedMaterial = lanternMetal;
@@ -590,7 +594,7 @@ namespace EndlessHallway.Editor
             var cap = GameObject.CreatePrimitive(PrimitiveType.Cube);
             cap.name = "Lantern_Cap";
             cap.transform.SetParent(lightingGroup.transform, false);
-            cap.transform.position = new Vector3(0.0f, 6.36f, 28.50f);
+            cap.transform.position = new Vector3(0.0f, 7.06f, 28.50f);
             cap.transform.localScale = new Vector3(0.32f, 0.08f, 0.32f);
             var capRend = cap.GetComponent<Renderer>();
             capRend.sharedMaterial = lanternMetal;
@@ -601,7 +605,7 @@ namespace EndlessHallway.Editor
             var glass = GameObject.CreatePrimitive(PrimitiveType.Cube);
             glass.name = "Lantern_Glass";
             glass.transform.SetParent(lightingGroup.transform, false);
-            glass.transform.position = new Vector3(0.0f, 6.20f, 28.50f);
+            glass.transform.position = new Vector3(0.0f, 6.90f, 28.50f);
             glass.transform.localScale = new Vector3(0.24f, 0.26f, 0.24f);
             var glassRend = glass.GetComponent<Renderer>();
             glassRend.sharedMaterial = lanternGlass;
