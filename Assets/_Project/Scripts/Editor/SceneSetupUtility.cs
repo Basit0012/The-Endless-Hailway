@@ -556,20 +556,34 @@ namespace EndlessHallway.Editor
                 foreach (var smr in charInstance.GetComponentsInChildren<SkinnedMeshRenderer>(true))
                 {
                     string n = smr.gameObject.name.ToLower();
-                    if (n.Contains("head") || n.Contains("eyes") || n.Contains("jaw") || n.Contains("face") || n.Contains("balaclava"))
+                    if (n.Contains("head") || n.Contains("eyes") || n.Contains("jaw") ||
+                        n.Contains("face") || n.Contains("balaclava") || n.Contains("pullover") ||
+                        n.Contains("jacket") || n.Contains("arms") || n.Contains("bag") ||
+                        n.Contains("body") || n.Contains("half_"))
                     {
                         smr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.ShadowsOnly;
+                    }
+                    else
+                    {
+                        smr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
                     }
                 }
 
                 var modelField = typeof(PlayerController).GetField("characterModel", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
                 if (modelField != null) modelField.SetValue(pc, charInstance);
 
+                var anim = charInstance.GetComponent<Animator>();
+                if (anim != null)
+                {
+                    var animCtrl = AssetDatabase.LoadAssetAtPath<RuntimeAnimatorController>("Assets/_Project/Animations/Adventure_Character_AC.controller");
+                    if (animCtrl != null) anim.runtimeAnimatorController = animCtrl;
+                    anim.applyRootMotion = false;
+                }
                 var animField = typeof(PlayerController).GetField("characterAnimator", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-                if (animField != null) animField.SetValue(pc, charInstance.GetComponent<Animator>());
+                if (animField != null) animField.SetValue(pc, anim);
             }
 
-            GameObject camHolder = new GameObject("CameraHolder");
+            GameObject camHolder = new GameObject("CameraPivot");
             camHolder.transform.SetParent(playerObj.transform);
             camHolder.transform.localPosition = new Vector3(0f, 0.82f, 0.06f);
 
@@ -589,7 +603,7 @@ namespace EndlessHallway.Editor
             var bodyField = typeof(PlayerCameraLook).GetField("playerBody", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
             if (bodyField != null) bodyField.SetValue(look, playerObj.transform);
             var camField = typeof(PlayerCameraLook).GetField("cameraTransform", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            if (camField != null) camField.SetValue(look, camObj.transform);
+            if (camField != null) camField.SetValue(look, camHolder.transform);
 
             PlayerInteraction interaction = playerObj.AddComponent<PlayerInteraction>();
             var rayOriginField = typeof(PlayerInteraction).GetField("rayOrigin", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);

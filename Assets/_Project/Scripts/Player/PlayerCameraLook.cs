@@ -42,13 +42,22 @@ namespace EndlessHallway.Player
 
             if (cameraTransform == null)
             {
-                targetCamera = GetComponentInChildren<Camera>();
-                if (targetCamera != null) cameraTransform = targetCamera.transform;
-                else cameraTransform = transform;
+                var pivot = transform.Find("CameraPivot") ?? transform.Find("CameraHolder");
+                if (pivot != null)
+                {
+                    cameraTransform = pivot;
+                    targetCamera = pivot.GetComponentInChildren<Camera>();
+                }
+                else
+                {
+                    targetCamera = GetComponentInChildren<Camera>();
+                    if (targetCamera != null) cameraTransform = targetCamera.transform;
+                    else cameraTransform = transform;
+                }
             }
             else
             {
-                targetCamera = cameraTransform.GetComponent<Camera>();
+                targetCamera = cameraTransform.GetComponent<Camera>() ?? cameraTransform.GetComponentInChildren<Camera>();
             }
 
             if (playerBody != null)

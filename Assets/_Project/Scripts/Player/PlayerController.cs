@@ -54,6 +54,17 @@ namespace EndlessHallway.Player
         private float currentSpeed = 3.0f;
         private float currentControllerHeight = 1.8f;
 
+        private static readonly int AnimSpeed = Animator.StringToHash("Speed");
+        private static readonly int AnimIsCrouching = Animator.StringToHash("IsCrouching");
+        private static readonly int AnimTurn = Animator.StringToHash("Turn");
+        private static readonly int AnimMoveX = Animator.StringToHash("MoveX");
+        private static readonly int AnimMoveZ = Animator.StringToHash("MoveZ");
+
+        private float smoothedSpeed = 0f;
+        private float smoothedTurn = 0f;
+        private float smoothedMoveX = 0f;
+        private float smoothedMoveZ = 0f;
+
         public bool CanMove
         {
             get => canMove;
@@ -64,6 +75,7 @@ namespace EndlessHallway.Player
                 {
                     velocity = Vector3.zero;
                     isSprinting = false;
+                    UpdateAnimations(Vector2.zero);
                 }
             }
         }
@@ -83,6 +95,11 @@ namespace EndlessHallway.Player
                 currentControllerHeight = standingHeight;
             }
 
+            if (cameraHolder == null)
+            {
+                cameraHolder = transform.Find("CameraPivot") ?? transform.Find("CameraHolder");
+            }
+
             if (cameraHolder != null)
             {
                 defaultCameraLocalPos = cameraHolder.localPosition;
@@ -100,6 +117,14 @@ namespace EndlessHallway.Player
             {
                 characterAnimator = characterModel.GetComponent<Animator>();
             }
+            if (characterAnimator == null)
+            {
+                characterAnimator = GetComponentInChildren<Animator>(true);
+            }
+            if (characterAnimator != null)
+            {
+                characterAnimator.applyRootMotion = false;
+            }
 
             if (GetComponent<PlayerStressSystem>() == null)
             {
@@ -113,12 +138,17 @@ namespace EndlessHallway.Player
             {
                 velocity = Vector3.zero;
                 isSprinting = false;
+                UpdateAnimations(Vector2.zero);
                 return;
             }
 
             ApplyGravity();
 
-            if (!canMove) return;
+            if (!canMove)
+            {
+                UpdateAnimations(Vector2.zero);
+                return;
+            }
 
             Vector2 moveInput = ReadMovementInput();
             HandleCrouch();
@@ -129,6 +159,26 @@ namespace EndlessHallway.Player
 
             HandleHeadBob(moveInput);
             HandleFootsteps(moveInput);
+            UpdateAnimations(moveInput);
+        }
+
+        private void UpdateAnimations(Vector2 moveInput)
+        {
+            if (characterAnimator == null) return;
+
+            bool isMoving = moveInput.sqrMagnitude > 0.01f && canMove;
+            float targetSpeed = isMoving ? currentSpeed : 0f;
+
+            smoothedSpeed = Mathf.MoveTowards(smoothedSpeed, targetSpeed, Time.deltaTime * 12f);
+            smoothedTurn = Mathf.MoveTowards(smoothedTurn, isMoving ? moveInput.x : 0f, Time.deltaTime * 10f);
+            smoothedMoveX = Mathf.MoveTowards(smoothedMoveX, isMoving ? moveInput.x : 0f, Time.deltaTime * 10f);
+            smoothedMoveZ = Mathf.MoveTowards(smoothedMoveZ, isMoving ? moveInput.y : 0f, Time.deltaTime * 10f);
+
+            characterAnimator.SetFloat(AnimSpeed, smoothedSpeed);
+            characterAnimator.SetBool(AnimIsCrouching, isCrouching);
+            characterAnimator.SetFloat(AnimTurn, smoothedTurn);
+            characterAnimator.SetFloat(AnimMoveX, smoothedMoveX);
+            characterAnimator.SetFloat(AnimMoveZ, smoothedMoveZ);
         }
 
         private Vector2 ReadMovementInput()
