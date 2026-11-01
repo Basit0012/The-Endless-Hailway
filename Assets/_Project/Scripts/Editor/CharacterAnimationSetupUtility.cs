@@ -141,73 +141,92 @@ namespace EndlessHallway.Editor
         /// </summary>
         public static void ConfigureAnimationImporters()
         {
-            string[] fbxFiles = {
-                "Crouched Walking.fbx",
-                "Start Walking.fbx",
-                "Stop Walking.fbx",
-                "Walking Left Turn.fbx",
-                "Walking Turn 180.fbx",
-                "Walking.fbx"
+            // Configure each FBX with exact take definitions and humanoid settings
+            ConfigureFbxClip("Walking.fbx", "Walking", 0, 31, true);
+            ConfigureFbxClip("Crouched Walking.fbx", "Crouched Walking", 0, 31, true);
+            ConfigureFbxClip("Start Walking.fbx", "Start Walking", 0, 88, false);
+            ConfigureFbxClip("Walking Left Turn.fbx", "Walking Left Turn", 0, 36, false);
+            ConfigureFbxClip("Walking Turn 180.fbx", "Walking Turn 180", 0, 30, false);
+
+            // Stop Walking.fbx contains both the decelerating stop and the clean resting Idle pose
+            ConfigureStopWalkingFbx();
+
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+        }
+
+        private static void ConfigureFbxClip(string fileName, string clipName, int firstFrame, int lastFrame, bool loop)
+        {
+            string path = $"{AnimSourceFolder}/{fileName}";
+            ModelImporter importer = AssetImporter.GetAtPath(path) as ModelImporter;
+            if (importer == null)
+            {
+                Debug.LogWarning($"[CharacterAnimationSetup] Missing FBX file: {path}");
+                return;
+            }
+
+            if (importer.animationType != ModelImporterAnimationType.Human)
+            {
+                importer.animationType = ModelImporterAnimationType.Human;
+                importer.avatarSetup = ModelImporterAvatarSetup.CreateFromThisModel;
+            }
+
+            var clip = new ModelImporterClipAnimation
+            {
+                name = clipName,
+                takeName = "mixamo.com",
+                firstFrame = firstFrame,
+                lastFrame = lastFrame,
+                loopTime = loop,
+                loopPose = loop,
+                lockRootRotation = true,
+                lockRootHeightY = true,
+                lockRootPositionXZ = true
             };
 
-            bool anyReimported = false;
+            importer.clipAnimations = new[] { clip };
+            importer.SaveAndReimport();
+        }
 
-            foreach (var file in fbxFiles)
+        private static void ConfigureStopWalkingFbx()
+        {
+            string path = $"{AnimSourceFolder}/Stop Walking.fbx";
+            ModelImporter importer = AssetImporter.GetAtPath(path) as ModelImporter;
+            if (importer == null) return;
+
+            if (importer.animationType != ModelImporterAnimationType.Human)
             {
-                string path = $"{AnimSourceFolder}/{file}";
-                ModelImporter importer = AssetImporter.GetAtPath(path) as ModelImporter;
-                if (importer == null)
-                {
-                    Debug.LogWarning($"[CharacterAnimationSetup] Missing FBX file: {path}");
-                    continue;
-                }
-
-                bool needsReimport = false;
-
-                // Ensure Rig is Humanoid and creates its own avatar from this model
-                if (importer.animationType != ModelImporterAnimationType.Human)
-                {
-                    importer.animationType = ModelImporterAnimationType.Human;
-                    importer.avatarSetup = ModelImporterAvatarSetup.CreateFromThisModel;
-                    needsReimport = true;
-                }
-
-                // Loop Time rule: ON for Walking and Crouched Walking, OFF for Start, Stop, and Turn clips
-                bool isLoopClip = file.Equals("Walking.fbx", StringComparison.OrdinalIgnoreCase) ||
-                                 file.Equals("Crouched Walking.fbx", StringComparison.OrdinalIgnoreCase);
-
-                ModelImporterClipAnimation[] clips = importer.clipAnimations;
-                if (clips == null || clips.Length == 0)
-                {
-                    clips = importer.defaultClipAnimations;
-                }
-
-                if (clips != null && clips.Length > 0)
-                {
-                    for (int i = 0; i < clips.Length; i++)
-                    {
-                        clips[i].loopTime = isLoopClip;
-                        clips[i].loopPose = isLoopClip;
-                        clips[i].lockRootRotation = true;
-                        clips[i].lockRootHeightY = true;
-                        clips[i].lockRootPositionXZ = true;
-                    }
-                    importer.clipAnimations = clips;
-                    needsReimport = true;
-                }
-
-                if (needsReimport)
-                {
-                    Debug.Log($"[CharacterAnimationSetup] Reimporting {file} as Humanoid (loop={isLoopClip})...");
-                    importer.SaveAndReimport();
-                    anyReimported = true;
-                }
+                importer.animationType = ModelImporterAnimationType.Human;
+                importer.avatarSetup = ModelImporterAvatarSetup.CreateFromThisModel;
             }
 
-            if (anyReimported)
+            var stopClip = new ModelImporterClipAnimation
             {
-                AssetDatabase.Refresh();
-            }
+                name = "Stop Walking",
+                takeName = "mixamo.com",
+                firstFrame = 0,
+                lastFrame = 80,
+                loopTime = false,
+                lockRootRotation = true,
+                lockRootHeightY = true,
+                lockRootPositionXZ = true
+            };
+
+            var idleClip = new ModelImporterClipAnimation
+            {
+                name = "Idle",
+                takeName = "mixamo.com",
+                firstFrame = 80,
+                lastFrame = 90,
+                loopTime = true,
+                loopPose = true,
+                lockRootRotation = true,
+                lockRootHeightY = true,
+                lockRootPositionXZ = true
+            };
+
+            importer.clipAnimations = new[] { stopClip, idleClip };
+            importer.SaveAndReimport();
         }
 
         private static Dictionary<string, AnimationClip> LoadAllHumanoidClips()
@@ -231,10 +250,8 @@ namespace EndlessHallway.Editor
                 {
                     if (asset is AnimationClip clip && !clip.name.StartsWith("__preview__"))
                     {
-                        string key = Path.GetFileNameWithoutExtension(file);
-                        result[key] = clip;
-                        Debug.Log($"[CharacterAnimationSetup] Loaded clip '{key}' -> '{clip.name}' (length={clip.length:F2}s, loop={clip.isLooping})");
-                        break;
+                        result[clip.name] = clip;
+                        Debug.Log($"[CharacterAnimationSetup] Loaded clip '{clip.name}' from {file} (length={clip.length:F2}s, loop={clip.isLooping}, isHuman={clip.isHumanMotion})");
                     }
                 }
             }
@@ -244,42 +261,23 @@ namespace EndlessHallway.Editor
 
         private static AnimationClip EnsureIdleClip(Dictionary<string, AnimationClip> clips)
         {
-            string idlePath = $"{OutputAnimFolder}/Idle.anim";
-            AnimationClip existingIdle = AssetDatabase.LoadAssetAtPath<AnimationClip>(idlePath);
-            if (existingIdle != null)
+            if (clips.TryGetValue("Idle", out AnimationClip idleClip))
             {
-                return existingIdle;
+                return idleClip;
             }
 
-            Debug.LogWarning("[CharacterAnimationSetup] Generating clean resting Idle.anim from Stop Walking rest frame.");
-
-            AnimationClip idleClip = new AnimationClip();
-            idleClip.name = "Idle";
-            idleClip.wrapMode = WrapMode.Loop;
-
-            if (clips.TryGetValue("Stop Walking", out AnimationClip stopClip))
+            // Fallback: search across all assets in Main-Character-Animation
+            var allAssets = AssetDatabase.LoadAllAssetsAtPath($"{AnimSourceFolder}/Stop Walking.fbx");
+            foreach (var a in allAssets)
             {
-                EditorCurveBinding[] bindings = AnimationUtility.GetCurveBindings(stopClip);
-                float sampleTime = stopClip.length > 0.1f ? stopClip.length - 0.05f : 0f;
-                foreach (var b in bindings)
+                if (a is AnimationClip c && c.name == "Idle")
                 {
-                    AnimationCurve srcCurve = AnimationUtility.GetEditorCurve(stopClip, b);
-                    if (srcCurve != null && srcCurve.length > 0)
-                    {
-                        float val = srcCurve.Evaluate(sampleTime);
-                        AnimationCurve constCurve = AnimationCurve.Constant(0f, 1f, val);
-                        AnimationUtility.SetEditorCurve(idleClip, b, constCurve);
-                    }
+                    return c;
                 }
             }
 
-            AnimationClipSettings settings = AnimationUtility.GetAnimationClipSettings(idleClip);
-            settings.loopTime = true;
-            AnimationUtility.SetAnimationClipSettings(idleClip, settings);
-
-            AssetDatabase.CreateAsset(idleClip, idlePath);
-            AssetDatabase.SaveAssets();
-            return idleClip;
+            Debug.LogError("[CharacterAnimationSetup] Native humanoid Idle clip not found in Stop Walking.fbx!");
+            return null;
         }
 
         /// <summary>
@@ -460,6 +458,8 @@ namespace EndlessHallway.Editor
             EnsureParameter(controller, "Speed", AnimatorControllerParameterType.Float);
             EnsureParameter(controller, "IsCrouching", AnimatorControllerParameterType.Bool);
             EnsureParameter(controller, "Turn", AnimatorControllerParameterType.Float);
+            EnsureParameter(controller, "MoveX", AnimatorControllerParameterType.Float);
+            EnsureParameter(controller, "MoveZ", AnimatorControllerParameterType.Float);
 
             AnimatorStateMachine sm = controller.layers[0].stateMachine;
             ChildAnimatorState[] existingStates = sm.states;
@@ -508,19 +508,25 @@ namespace EndlessHallway.Editor
             ClearTransitions(leftTurnState);
             ClearTransitions(turn180State);
 
-            // Transitions:
-            // 1. Idle -> Start Walking
+            // 1. Idle -> Start Walking (subtle acceleration)
             var tIdleToStart = idleState.AddTransition(startWalkState);
             tIdleToStart.hasExitTime = false;
             tIdleToStart.duration = 0.15f;
             tIdleToStart.AddCondition(AnimatorConditionMode.Greater, 0.1f, "Speed");
             tIdleToStart.AddCondition(AnimatorConditionMode.IfNot, 0, "IsCrouching");
 
-            // 2. Start Walking -> Walking
+            // Direct Idle -> Walking (instant responsive movement at full walk / sprint speed)
+            var tIdleToWalkDirect = idleState.AddTransition(walkingState);
+            tIdleToWalkDirect.hasExitTime = false;
+            tIdleToWalkDirect.duration = 0.15f;
+            tIdleToWalkDirect.AddCondition(AnimatorConditionMode.Greater, 2.5f, "Speed");
+            tIdleToWalkDirect.AddCondition(AnimatorConditionMode.IfNot, 0, "IsCrouching");
+
+            // 2. Start Walking -> Walking (responsive transition out of initial step)
             var tStartToWalk = startWalkState.AddTransition(walkingState);
             tStartToWalk.hasExitTime = true;
-            tStartToWalk.exitTime = 0.80f;
-            tStartToWalk.duration = 0.15f;
+            tStartToWalk.exitTime = 0.25f;
+            tStartToWalk.duration = 0.20f;
 
             // Start Walking -> Idle (aborted walk)
             var tStartToIdle = startWalkState.AddTransition(idleState);
@@ -534,11 +540,11 @@ namespace EndlessHallway.Editor
             tWalkToStop.duration = 0.15f;
             tWalkToStop.AddCondition(AnimatorConditionMode.Less, 0.1f, "Speed");
 
-            // 4. Stop Walking -> Idle
+            // 4. Stop Walking -> Idle (responsive settle into resting idle)
             var tStopToIdle = stopWalkState.AddTransition(idleState);
             tStopToIdle.hasExitTime = true;
-            tStopToIdle.exitTime = 0.80f;
-            tStopToIdle.duration = 0.15f;
+            tStopToIdle.exitTime = 0.30f;
+            tStopToIdle.duration = 0.20f;
 
             // Stop Walking -> Walking (resumed walking)
             var tStopToWalk = stopWalkState.AddTransition(walkingState);
