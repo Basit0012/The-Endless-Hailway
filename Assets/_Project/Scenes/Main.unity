@@ -9720,7 +9720,6 @@ GameObject:
   - component: {fileID: 412773510}
   - component: {fileID: 412773513}
   - component: {fileID: 412773512}
-  - component: {fileID: 412773511}
   m_Layer: 0
   m_Name: PauseMenuPanel
   m_TagString: Untagged
@@ -9750,26 +9749,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &412773511
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 412773509}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8268a1f70896c6247be49894248b4583, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EndlessHallway.UI.PauseMenuUI
-  pausePanel: {fileID: 412773509}
-  settingsPanel: {fileID: 1815783271}
-  resumeButton: {fileID: 333716848}
-  settingsButton: {fileID: 278297286}
-  restartLoopButton: {fileID: 639001505}
-  quitMainMenuButton: {fileID: 1548031080}
-  quitGameButton: {fileID: 565634652}
-  loopInfoText: {fileID: 1898065680}
 --- !u!114 &412773512
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -39321,14 +39300,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8268a1f70896c6247be49894248b4583, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EndlessHallway.UI.PauseMenuUI
-  pausePanel: {fileID: 0}
-  settingsPanel: {fileID: 0}
-  resumeButton: {fileID: 0}
-  settingsButton: {fileID: 0}
-  restartLoopButton: {fileID: 0}
-  quitMainMenuButton: {fileID: 0}
-  quitGameButton: {fileID: 0}
-  loopInfoText: {fileID: 0}
+  pausePanel: {fileID: 412773509}
+  settingsPanel: {fileID: 1815783271}
+  resumeButton: {fileID: 333716848}
+  settingsButton: {fileID: 278297286}
+  restartLoopButton: {fileID: 639001505}
+  quitMainMenuButton: {fileID: 1548031080}
+  quitGameButton: {fileID: 565634652}
+  loopInfoText: {fileID: 1898065680}
 --- !u!1 &1393642322
 GameObject:
   m_ObjectHideFlags: 0
@@ -53903,9 +53882,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EndlessHallway.UI.UIManager
   mainMenuUI: {fileID: 1393408301}
-  pauseMenuUI: {fileID: 0}
+  pauseMenuUI: {fileID: 1393408302}
   gameOverUI: {fileID: 1665326511}
-  settingsUI: {fileID: 0}
+  settingsUI: {fileID: 1815783271}
   creditsPanel: {fileID: 0}
   hudLayer: {fileID: 315687886}
   currentScreen: 1

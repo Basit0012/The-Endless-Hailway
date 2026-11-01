@@ -35,6 +35,7 @@ namespace EndlessHallway.Player
         [Header("Volume Reference")]
         [SerializeField] private Volume globalVolume;
         private Vignette vignetteComponent;
+        private FilmGrain filmGrain;
         private float baseVignetteIntensity = 0.35f;
 
         private Camera playerCamera;
@@ -45,7 +46,7 @@ namespace EndlessHallway.Player
         {
             if (Instance != null && Instance != this)
             {
-                Destroy(gameObject);
+                Destroy(this);
                 return;
             }
             Instance = this;
@@ -53,9 +54,46 @@ namespace EndlessHallway.Player
             SetupAudioSources();
         }
 
+        private void OnEnable()
+        {
+            if (Anomaly.AnomalyManager.Instance != null)
+            {
+                Anomaly.AnomalyManager.Instance.OnVolumeProfileChanged += HandleVolumeProfileChanged;
+            }
+        }
+
+        private void OnDisable()
+        {
+            if (Anomaly.AnomalyManager.Instance != null)
+            {
+                Anomaly.AnomalyManager.Instance.OnVolumeProfileChanged -= HandleVolumeProfileChanged;
+            }
+        }
+
         private void Start()
         {
+            if (Anomaly.AnomalyManager.Instance != null)
+            {
+                Anomaly.AnomalyManager.Instance.OnVolumeProfileChanged -= HandleVolumeProfileChanged;
+                Anomaly.AnomalyManager.Instance.OnVolumeProfileChanged += HandleVolumeProfileChanged;
+            }
             FindReferences();
+        }
+
+        private void HandleVolumeProfileChanged(VolumeProfile newProfile)
+        {
+            RebindVolumeComponents(newProfile);
+        }
+
+        private void RebindVolumeComponents(VolumeProfile profile)
+        {
+            if (profile == null) return;
+            profile.TryGet(out vignetteComponent);
+            if (vignetteComponent != null)
+            {
+                baseVignetteIntensity = vignetteComponent.intensity.value;
+            }
+            profile.TryGet(out filmGrain);
         }
 
         public void FindReferences()
@@ -81,11 +119,7 @@ namespace EndlessHallway.Player
             }
             if (globalVolume != null && globalVolume.profile != null)
             {
-                globalVolume.profile.TryGet(out vignetteComponent);
-                if (vignetteComponent != null)
-                {
-                    baseVignetteIntensity = vignetteComponent.intensity.value;
-                }
+                RebindVolumeComponents(globalVolume.profile);
             }
         }
 

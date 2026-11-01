@@ -18,6 +18,7 @@ namespace EndlessHallway.Editor
         {
             EditorApplication.delayCall += () =>
             {
+                if (EditorApplication.isPlayingOrWillChangePlaymode) return;
                 FixAllElevatorMaterials(false);
             };
         }
@@ -30,6 +31,8 @@ namespace EndlessHallway.Editor
 
         public static void FixAllElevatorMaterials(bool showDialog)
         {
+            if (EditorApplication.isPlayingOrWillChangePlaymode || Application.isPlaying) return;
+
             // 1. Ensure URP Lit shader is available
             Shader urpLitShader = Shader.Find(UrpLitShaderName);
             if (urpLitShader == null)

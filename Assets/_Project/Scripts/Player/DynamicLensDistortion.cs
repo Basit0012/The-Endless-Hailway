@@ -16,6 +16,7 @@ namespace EndlessHallway.Player
         [Header("Volume Reference")]
         [SerializeField] private Volume targetVolume;
         private LensDistortion lensDistortion;
+        private FilmGrain filmGrain;
 
         [Header("Distortion Curves")]
         [Tooltip("Barrel distortion intensity per loop (0 to 7)")]
@@ -40,7 +41,7 @@ namespace EndlessHallway.Player
         {
             if (Instance != null && Instance != this)
             {
-                Destroy(gameObject);
+                Destroy(this);
                 return;
             }
             Instance = this;
@@ -52,26 +53,60 @@ namespace EndlessHallway.Player
             EnsureLensDistortion();
         }
 
+        private void OnEnable()
+        {
+            if (Anomaly.AnomalyManager.Instance != null)
+            {
+                Anomaly.AnomalyManager.Instance.OnVolumeProfileChanged += HandleVolumeProfileChanged;
+            }
+        }
+
+        private void OnDisable()
+        {
+            if (Anomaly.AnomalyManager.Instance != null)
+            {
+                Anomaly.AnomalyManager.Instance.OnVolumeProfileChanged -= HandleVolumeProfileChanged;
+            }
+        }
+
         private void Start()
         {
+            if (Anomaly.AnomalyManager.Instance != null)
+            {
+                Anomaly.AnomalyManager.Instance.OnVolumeProfileChanged -= HandleVolumeProfileChanged;
+                Anomaly.AnomalyManager.Instance.OnVolumeProfileChanged += HandleVolumeProfileChanged;
+            }
             EnsureLensDistortion();
+        }
+
+        private void HandleVolumeProfileChanged(VolumeProfile newProfile)
+        {
+            RebindVolumeComponents(newProfile);
+        }
+
+        private void RebindVolumeComponents(VolumeProfile profile)
+        {
+            if (profile == null) return;
+            profile.TryGet(out lensDistortion);
+            if (lensDistortion == null)
+            {
+                lensDistortion = profile.Add<LensDistortion>(true);
+                lensDistortion.intensity.overrideState = true;
+                lensDistortion.scale.overrideState = true;
+                lensDistortion.scale.value = 1.0f;
+            }
+            else
+            {
+                lensDistortion.intensity.overrideState = true;
+            }
+            profile.TryGet(out filmGrain);
         }
 
         private void EnsureLensDistortion()
         {
             if (targetVolume != null && targetVolume.profile != null)
             {
-                if (!targetVolume.profile.TryGet(out lensDistortion))
-                {
-                    lensDistortion = targetVolume.profile.Add<LensDistortion>(true);
-                    lensDistortion.intensity.overrideState = true;
-                    lensDistortion.scale.overrideState = true;
-                    lensDistortion.scale.value = 1.0f;
-                }
-                else
-                {
-                    lensDistortion.intensity.overrideState = true;
-                }
+                RebindVolumeComponents(targetVolume.profile);
             }
         }
 

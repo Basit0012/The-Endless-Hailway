@@ -12,6 +12,8 @@ namespace EndlessHallway.Anomaly
     {
         public static AnomalyManager Instance { get; private set; }
 
+        public event System.Action<UnityEngine.Rendering.VolumeProfile> OnVolumeProfileChanged;
+
         [Header("Configurations")]
         [SerializeField] private List<LoopConfigSO> loopConfigs = new List<LoopConfigSO>();
 
@@ -26,7 +28,7 @@ namespace EndlessHallway.Anomaly
         {
             if (Instance != null && Instance != this)
             {
-                Destroy(gameObject);
+                Destroy(this);
                 return;
             }
             Instance = this;
@@ -98,6 +100,7 @@ namespace EndlessHallway.Anomaly
             if (sceneVolume != null && profile != null)
             {
                 sceneVolume.profile = profile;
+                OnVolumeProfileChanged?.Invoke(profile);
             }
         }
 
@@ -127,7 +130,7 @@ namespace EndlessHallway.Anomaly
             // Reset Volume to baseline
             if (sceneVolume != null && baselineVolumeProfile != null)
             {
-                sceneVolume.profile = baselineVolumeProfile;
+                SetSceneVolumeProfile(baselineVolumeProfile);
             }
 
             // Reset Observer to hidden
@@ -155,7 +158,7 @@ namespace EndlessHallway.Anomaly
                 {
                     if (sceneVolume != null && anomaly.volumeProfile != null)
                     {
-                        sceneVolume.profile = anomaly.volumeProfile;
+                        SetSceneVolumeProfile(anomaly.volumeProfile);
                     }
                 }
                 else if (anomaly.anomalyType == AnomalyType.ObserverSpawn)

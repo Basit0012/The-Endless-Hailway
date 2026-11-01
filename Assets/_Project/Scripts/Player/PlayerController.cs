@@ -295,8 +295,13 @@ namespace EndlessHallway.Player
         {
             if (characterController == null) return false;
             float radius = characterController.radius * 0.85f;
-            Vector3 start = transform.position + Vector3.up * (crouchHeight * 0.5f);
-            float checkDistance = standingHeight - (crouchHeight * 0.5f);
+            // The capsule base (feet level) remains anchored at -standingHeight * 0.5f relative to transform
+            Vector3 feet = transform.position - Vector3.up * (standingHeight * 0.5f);
+            // Center of the sphere placed just below the top of the crouched height
+            Vector3 start = feet + Vector3.up * (crouchHeight - radius);
+            float checkDistance = standingHeight - crouchHeight;
+            if (checkDistance <= 0.01f) return false;
+
             return Physics.SphereCast(start, radius, Vector3.up, out _, checkDistance, ~0, QueryTriggerInteraction.Ignore);
         }
 
