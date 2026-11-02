@@ -1,0 +1,116 @@
+================================================================================
+              THE ENDLESS HALLWAY — LIGHTING AUDIT REPORT                       
+================================================================================
+Generated: 2026-11-02 02:34:04
+Scene: Assets/_Project/Scenes/Main.unity
+================================================================================
+
+--------------------------------------------------------------------------------
+1. UNIVERSAL RENDER PIPELINE (URP) CONFIGURATION
+--------------------------------------------------------------------------------
+Active URP Asset: PC_RPAsset (Assets/Settings/PC_RPAsset.asset)
+SRP Batcher Enabled: True
+Supports Camera Depth Texture: True
+Supports Camera Opaque Texture: True
+Supports HDR: True
+MSAA Sample Count: 1
+Render Scale: 1
+
+Shadow Settings:
+  Shadow Distance: 50 m
+  Shadow Cascades: 4
+  Shadow Depth Bias: 0.1
+  Shadow Normal Bias: 0.5
+  Supports Main Light Shadows: True
+  Supports Additional Light Shadows: True
+
+--------------------------------------------------------------------------------
+2. AMBIENT & ENVIRONMENT LIGHTING SETUP
+--------------------------------------------------------------------------------
+Ambient Mode: Flat
+Ambient Intensity: 0.150
+Flat Ambient Color: RGBA(0.012, 0.012, 0.016, 1.000)
+Default Reflection Mode: Custom
+Default Reflection Resolution: 128
+Reflection Intensity: 1.000
+Reflection Bounces: 1
+Custom Reflection Cubemap: 
+
+--------------------------------------------------------------------------------
+3. FOG CONFIGURATION
+--------------------------------------------------------------------------------
+Fog Enabled: False
+Fog is currently DISABLED in RenderSettings.
+
+--------------------------------------------------------------------------------
+4. LIGHT SOURCES AUDIT (SCENE LIGHTS)
+--------------------------------------------------------------------------------
+Total Light Components in Scene: 14
+
+Hierarchy Path                           | Type        | Mode     | Intensity | Range  | Shadows      | Color (Hex)     
+-------------------------------------------------------------------------------------------------------------------
+...LightsGroup/CeilingLight_0/PointLight | Point       | Realtime | 1.20      | 6.5    | None         | #FFEDD1         
+...LightsGroup/CeilingLight_1/PointLight | Point       | Realtime | 1.20      | 6.5    | None         | #FFEDD1         
+...ghtsGroup/CeilingLight_214/PointLight | Point       | Realtime | 1.20      | 6.5    | None         | #FFEDD1         
+...LightsGroup/CeilingLight_3/PointLight | Point       | Realtime | 1.20      | 6.5    | None         | #FFEDD1         
+...LightsGroup/CeilingLight_4/PointLight | Point       | Realtime | 1.20      | 4.5    | None         | #FFEDD1         
+...LightsGroup/CeilingLight_5/PointLight | Point       | Realtime | 0.80      | 2.4    | None         | #FFEDD1         
+Environment/Elevator/ElevatorLight       | Point       | Realtime | 1.20      | 5.5    | None         | #FFD199         
+Environment/EmergencyLight_FloorStrip    | Point       | Realtime | 1.20      | 10.0   | None         | #D91F14         
+...onment/Room_210/BedsideLamp/LampLight | Point       | Realtime | 1.60      | 5.0    | None         | #FFE0B8         
+Environment/Room_212/FloorLamp/LampLight | Point       | Realtime | 1.80      | 6.0    | None         | #FFE8C2         
+Environment/Room_214/SpotLight_Room214   | Spot        | Realtime | 5.00      | 5.5    | Soft         | #FFEBC7         
+Environment/Room_216/BareBulb/BulbLight  | Point       | Realtime | 1.40      | 6.0    | None         | #FFD999         
+.../Attic_Lighting/Hanging_Lantern_Light | Point       | Realtime | 6.00      | 15.0   | Soft         | #FFCC80         
+...rwellLanding/Stairwell_Distant_Beacon | Point       | Realtime | 1.20      | 3.5    | None         | #FFD999         
+-------------------------------------------------------------------------------------------------------------------
+Light Summary: Realtime=14, Mixed=0, Baked=0
+Active Shadow Casters: 1
+
+--------------------------------------------------------------------------------
+5. REFLECTION PROBES AUDIT
+--------------------------------------------------------------------------------
+Total Reflection Probes in Scene: 0
+
+--------------------------------------------------------------------------------
+6. POST-PROCESSING & VOLUMES AUDIT
+--------------------------------------------------------------------------------
+Total Volume Components in Scene: 1
+
+=== Volume: [GlobalVolume] ===
+  Is Global: True
+  Priority: 1
+  Weight: 1.00
+  Profile: VolumeProfile_Normal (Assets/_Project/Settings/Volumes/VolumeProfile_Normal.asset)
+  Profile Components (3):
+    * LensDistortion (active: True)
+        - Intensity: -0.08
+        - X Multiplier: 1.00
+        - Y Multiplier: 1.00
+        - Center: (0.50, 0.50)
+        - Scale: 1.00
+    * Vignette (active: True)
+        - Intensity: 0.36
+        - Smoothness: 0.40
+        - Color: #000000
+        - Rounded: False
+    * ColorAdjustments (active: True)
+        - Post Exposure: 0.00
+        - Contrast: 14.0
+        - Saturation: -8.0
+        - Color Filter: #F7F5E6
+        - Hue Shift: 0.0
+
+--------------------------------------------------------------------------------
+7. SHADOW ATLAS ANALYSIS & ZERO-WARNING ROADMAP
+--------------------------------------------------------------------------------
+Active Punctual Shadow Casters: 1
+  - [Environment/StairwellLanding/Attic_Room/Attic_Lighting/Hanging_Lantern_Light] Type=Point, Shadows=Soft, Bias=0.05, NormalBias=0.4
+
+Root Cause of Console Warning:
+  'Reduced additional punctual light shadows resolution by 2 to make 6 shadow maps fit in the 2048x2048 shadow atlas.'
+  Explanation: 6 realtime point lights in the hallway all have realtime shadows enabled simultaneously.
+  Because each point light requires 6 cube faces or multiple slices, URP runs out of shadow atlas space and is forced to downsample resolution dynamically.
+  Survival Horror Solution: In the 'no light' aesthetic, corridor ceiling fixtures are OFF / barely glowing emissives (NO realtime shadows). Only the player's Flashlight spot light casts realtime shadows.
+  With only 1 active shadow caster (Flashlight Spotlight = 1 atlas slice), shadow atlas usage is optimal and atlas reduction warnings drop to exactly ZERO.
+

@@ -1,0 +1,282 @@
+================================================================================
+              THE ENDLESS HALLWAY — ENVIRONMENT AUDIT REPORT                    
+================================================================================
+Generated: 2026-11-02 01:18:44
+Scene: Assets/_Project/Scenes/Main.unity
+Target Grid Size: 0.05 m (5 cm)
+Gap Detection Threshold: 0.2 cm to 20.0 cm
+================================================================================
+
+--------------------------------------------------------------------------------
+1. NON-(1,1,1) SCALE ON ENVIRONMENT MESHES
+--------------------------------------------------------------------------------
+Total Environment Renderers: 366
+Primitive Meshes with Non-(1,1,1) Scale (Used as Procedural Boxes/Planes): 357
+Imported/Non-Primitive Meshes with Non-(1,1,1) Scale: 2
+
+Imported Meshes with Non-(1,1,1) Scale (UV / attachment distortion risk):
+  - [Props/ObserverEntity/ObserverSilhouette] at (1.50, 1.00, 9.20) -> Mesh: Capsule, LocalScale: (0.550, 0.950, 0.400), LossyScale: (0.550, 0.950, 0.400)
+  - [Environment/Room_214/RoomProps/Telephone_Table/RotaryTelephone/Handset/Bar] at (3.30, 0.80, 9.24) -> Mesh: Capsule, LocalScale: (0.032, 0.130, 0.032), LossyScale: (0.032, 0.130, 0.032)
+
+--------------------------------------------------------------------------------
+2. OBJECTS OFF 0.05 M GRID
+--------------------------------------------------------------------------------
+Total Physical Objects Checked: 375
+Objects Off-Grid (> 1mm): 277 (209 with dev >= 1 cm)
+
+Sample Off-Grid Environment Objects (Max Deviation >= 1.0 cm):
+  - [Environment/StairwellLanding/Attic_Room/Stairwell_Railing/Railing_Left_Baluster_16] -> Pos: (-0.7000, 3.2100, 27.5796) -> Snap: (-0.70, 3.20, 27.60), MaxDev: 2.04 cm
+  - [Environment/Room_214/RoomProps/Telephone_Table/TableLeg_1_1] -> Pos: (3.5200, 0.3150, 9.4200) -> Snap: (3.50, 0.30, 9.40), MaxDev: 2.00 cm
+  - [Environment/StairwellLanding/Stairs/Step_Tread_8] -> Pos: (0.0000, 1.5550, 27.1800) -> Snap: (0.00, 1.55, 27.20), MaxDev: 2.00 cm
+  - [Environment/StairwellLanding/Attic_Room/Set_Dressing/Metal_Shelving_Unit/Cube] -> Pos: (-2.8500, 3.6750, 27.7000) -> Snap: (-2.85, 3.70, 27.70), MaxDev: 2.50 cm
+  - [Environment/Room_214/RoomProps/Telephone_Table/TableLeg_-1_1] -> Pos: (3.0800, 0.3150, 9.4200) -> Snap: (3.10, 0.30, 9.40), MaxDev: 2.00 cm
+  - [Environment/StairwellLanding/Stairs/UnderStair_Bulkheads/Bulkhead_Left_9] -> Pos: (-0.6600, 0.7875, 27.4600) -> Snap: (-0.65, 0.80, 27.45), MaxDev: 1.25 cm
+  - [Environment/StairwellLanding/Stairs/Step_Riser_6] -> Pos: (0.0000, 1.1375, 26.4800) -> Snap: (0.00, 1.15, 26.50), MaxDev: 2.00 cm
+  - [Environment/Door_210/Frame/Jamb_Left] -> Pos: (-1.2000, 1.0750, 5.5200) -> Snap: (-1.20, 1.10, 5.50), MaxDev: 2.50 cm
+  - [Environment/Door_212/Frame/Jamb_Right] -> Pos: (-1.2000, 1.0750, 14.4800) -> Snap: (-1.20, 1.10, 14.50), MaxDev: 2.50 cm
+  - [Environment/StairwellLanding/Attic_Room/Stairwell_Railing/NewelPost_NorthLeft] -> Pos: (-0.7000, 3.3250, 29.2800) -> Snap: (-0.70, 3.30, 29.30), MaxDev: 2.50 cm
+  - [Environment/StairwellLanding/Stairs/Stringer_Left] -> Pos: (-0.6500, 1.4000, 27.0400) -> Snap: (-0.65, 1.40, 27.05), MaxDev: 1.00 cm
+  - [Environment/StairwellLanding/Attic_Room/Set_Dressing/Spindle_Chair/Cube] -> Pos: (-1.8500, 3.2200, 26.0000) -> Snap: (-1.85, 3.20, 26.00), MaxDev: 2.00 cm
+  - [Environment/StairwellLanding/Attic_Room/Set_Dressing/Metal_Shelving_Unit/Cube] -> Pos: (-2.8500, 3.6750, 29.3000) -> Snap: (-2.85, 3.70, 29.30), MaxDev: 2.50 cm
+  - [Environment/Trim_Left] -> Pos: (-1.1800, 0.0600, 12.0000) -> Snap: (-1.20, 0.05, 12.00), MaxDev: 2.00 cm
+  - [Environment/StairwellLanding/Stairs/UnderStair_Bulkheads/Bulkhead_Left_5] -> Pos: (-0.6600, 0.4375, 26.3400) -> Snap: (-0.65, 0.45, 26.35), MaxDev: 1.25 cm
+  - [Environment/StairwellLanding/Attic_Room/Pitched_Roof/Rafter_Beams/Rafter_Right_3] -> Pos: (1.6000, 6.8100, 27.8500) -> Snap: (1.60, 6.80, 27.85), MaxDev: 1.00 cm
+  - [Environment/StairwellLanding/Stairs/Step_Riser_4] -> Pos: (0.0000, 0.7875, 25.9200) -> Snap: (0.00, 0.80, 25.90), MaxDev: 2.00 cm
+  - [Environment/StairwellLanding/Attic_Room/Chimney_Fireplace/Firebox_Ceiling] -> Pos: (0.0000, 3.8200, 31.4000) -> Snap: (0.00, 3.80, 31.40), MaxDev: 2.00 cm
+  - [Environment/StairwellLanding/Stairs/UnderStair_Bulkheads/Bulkhead_Left_10] -> Pos: (-0.6600, 0.8750, 27.7400) -> Snap: (-0.65, 0.90, 27.75), MaxDev: 2.50 cm
+  - [Environment/StairwellLanding/Attic_Room/Pitched_Roof/Rafter_Beams/Rafter_Left_6] -> Pos: (-1.6000, 6.8100, 31.5500) -> Snap: (-1.60, 6.80, 31.55), MaxDev: 1.00 cm
+  - [Props/Prop_Calendar] -> Pos: (-1.1800, 1.4000, 1.6000) -> Snap: (-1.20, 1.40, 1.60), MaxDev: 2.00 cm
+  - [Environment/StairwellLanding/Attic_Room/Chimney_Fireplace/Firebox_Back] -> Pos: (0.0000, 3.3750, 31.6100) -> Snap: (0.00, 3.40, 31.60), MaxDev: 2.50 cm
+  - [Environment/Door_214/Pivot/DoorSlab/RoomPlate_214] -> Pos: (1.2275, 1.9860, 9.9950) -> Snap: (1.25, 2.00, 10.00), MaxDev: 2.25 cm
+  - [Environment/StairwellLanding/Stairs/InnerHandrail_Left] -> Pos: (-0.6100, 2.1000, 27.0400) -> Snap: (-0.60, 2.10, 27.05), MaxDev: 1.00 cm
+  - [Environment/StairwellLanding/Stairs/UnderStair_Bulkheads/Bulkhead_Right_2] -> Pos: (0.6600, 0.1750, 25.5000) -> Snap: (0.65, 0.20, 25.50), MaxDev: 2.50 cm
+  - [Environment/StairwellLanding/Stairs/UnderStair_Bulkheads/Bulkhead_Left_2] -> Pos: (-0.6600, 0.1750, 25.5000) -> Snap: (-0.65, 0.20, 25.50), MaxDev: 2.50 cm
+  - [Environment/StairwellLanding/Attic_Room/Floor_Structure/AtticFloor_RightPath] -> Pos: (1.9500, 2.7300, 27.8500) -> Snap: (1.95, 2.75, 27.85), MaxDev: 2.00 cm
+  - [Environment/StairwellLanding/Attic_Room/Stairwell_Railing/Railing_Left_Handrail] -> Pos: (-0.7000, 3.6200, 26.9650) -> Snap: (-0.70, 3.60, 26.95), MaxDev: 2.00 cm
+  - [Environment/Room_214/RoomProps/Telephone_Table/RotaryTelephone/Handset/EarCup] -> Pos: (3.2200, 0.7950, 9.2350) -> Snap: (3.20, 0.80, 9.25), MaxDev: 2.00 cm
+  - [Environment/StairwellLanding/Attic_Room/Pitched_Roof/Rafter_Beams/Rafter_Left_0] -> Pos: (-1.6000, 6.8100, 24.2000) -> Snap: (-1.60, 6.80, 24.20), MaxDev: 1.00 cm
+  ... and 179 more off-grid objects.
+
+--------------------------------------------------------------------------------
+3. DUPLICATE OBJECTS (IDENTICAL POSITION, ROTATION, MESH)
+--------------------------------------------------------------------------------
+Identical Duplicate Renderer Pairs Found: 0
+
+--------------------------------------------------------------------------------
+4. DOOR AUDIT (PIVOT LOCATION, HINGES, DOOR VS FRAME OPENING, GAPS)
+--------------------------------------------------------------------------------
+Found 4 Swing Doors (DoorController) and 1 Elevator System.
+
+--- Swing Door: Door_210 (Door_210) ---
+  World Position: (-1.200, 0.000, 6.000)
+  Door Slab Dimensions: Width=0.050m, Height=2.080m, Length(Span)=0.870m
+  Pivot World Pos: (-1.200, 0.000, 5.560)
+  Pivot Relative to Slab: DistToEdge=0.000m, DistToCenter=0.435m
+  Pivot at Hinge Edge: YES (Correct)
+
+--- Swing Door: Door_212 (Door_212) ---
+  World Position: (-1.200, 0.000, 14.000)
+  Door Slab Dimensions: Width=0.050m, Height=2.080m, Length(Span)=0.870m
+  Pivot World Pos: (-1.200, 0.000, 13.560)
+  Pivot Relative to Slab: DistToEdge=0.000m, DistToCenter=0.435m
+  Pivot at Hinge Edge: YES (Correct)
+
+--- Swing Door: Door_214 (Door_214) ---
+  World Position: (1.200, 0.000, 10.000)
+  Door Slab Dimensions: Width=0.050m, Height=2.080m, Length(Span)=0.870m
+  Pivot World Pos: (1.200, 0.000, 9.560)
+  Pivot Relative to Slab: DistToEdge=0.000m, DistToCenter=0.435m
+  Pivot at Hinge Edge: YES (Correct)
+
+--- Swing Door: Door_216 (Door_216) ---
+  World Position: (1.200, 0.000, 18.000)
+  Door Slab Dimensions: Width=0.050m, Height=2.080m, Length(Span)=0.870m
+  Pivot World Pos: (1.200, 0.000, 17.560)
+  Pivot Relative to Slab: DistToEdge=0.000m, DistToCenter=0.435m
+  Pivot at Hinge Edge: YES (Correct)
+
+--- Elevator Doors (ElevatorController) ---
+
+--------------------------------------------------------------------------------
+5. PROBABLE GAPS (BOUNDS WITHIN 0.2 M BUT NOT TOUCHING/OVERLAPPING)
+--------------------------------------------------------------------------------
+Total Probable Structural Gaps Found: 98 (90 gaps >= 2 cm)
+
+High-Severity Gaps (>= 2 cm):
+  - [Environment/StairwellLanding/Stairs/Step_Riser_7 <=> Environment/StairwellLanding/Stairs/Step_UnderSupport_6]
+    -> Gap: 17.50 cm (Y=17.5cm). B1: (0.00, 1.31, 26.76) - B2: (0.00, 0.53, 26.62)
+  - [Environment/Room_214/Wall_West_North <=> Environment/Trim_Right]
+    -> Gap: 5.00 cm (X=5.0cm). B1: (1.30, 1.40, 11.53) - B2: (1.18, 0.06, 12.00)
+  - [Environment/Room_214/Wall_West_North <=> Environment/Corridor_Ceiling]
+    -> Gap: 5.00 cm (X=5.0cm). B1: (1.30, 1.40, 11.53) - B2: (0.00, 2.85, 12.00)
+  - [Environment/Room_214/Wall_West_North <=> Environment/Corridor_Floor]
+    -> Gap: 5.00 cm (X=5.0cm). B1: (1.30, 1.40, 11.53) - B2: (0.00, -0.05, 12.00)
+  - [Environment/Room_214/Wall_West_North <=> Environment/Corridor_RightWall_Group/RightWall_Lintel_214]
+    -> Gap: 5.00 cm (Z=5.0cm). B1: (1.30, 1.40, 11.53) - B2: (1.25, 2.48, 10.00)
+  - [Environment/StairwellLanding/Stairs/Step_Plinth <=> Environment/StairwellLanding/Stairs/Step_Tread_0]
+    -> Gap: 5.50 cm (Y=5.5cm). B1: (0.00, 0.04, 24.68) - B2: (0.00, 0.16, 24.94)
+  - [Environment/StairwellLanding/Stairs/Step_UnderSupport_5 <=> Environment/StairwellLanding/Stairs/Step_Tread_5]
+    -> Gap: 13.50 cm (Y=13.5cm). B1: (0.00, 0.44, 26.34) - B2: (0.00, 1.03, 26.34)
+  - [Environment/StairwellLanding/Stairs/Step_UnderSupport_5 <=> Environment/StairwellLanding/Stairs/Step_Riser_6]
+    -> Gap: 17.50 cm (Y=17.5cm). B1: (0.00, 0.44, 26.34) - B2: (0.00, 1.14, 26.48)
+  - [Environment/StairwellLanding/Stairs/Step_UnderSupport_4 <=> Environment/StairwellLanding/Stairs/Step_Tread_4]
+    -> Gap: 13.50 cm (Y=13.5cm). B1: (0.00, 0.35, 26.06) - B2: (0.00, 0.86, 26.06)
+  - [Environment/StairwellLanding/Stairs/Step_UnderSupport_4 <=> Environment/StairwellLanding/Stairs/Step_Riser_5]
+    -> Gap: 17.50 cm (Y=17.5cm). B1: (0.00, 0.35, 26.06) - B2: (0.00, 0.96, 26.20)
+  - [Environment/StairwellLanding/Stairs/Step_Tread_12 <=> Environment/StairwellLanding/Stairs/Step_UnderSupport_12]
+    -> Gap: 13.50 cm (Y=13.5cm). B1: (0.00, 2.26, 28.30) - B2: (0.00, 1.05, 28.30)
+  - [Environment/StairwellLanding/Stairs/Step_Tread_12 <=> Environment/StairwellLanding/Stairs/Step_Tread_13]
+    -> Gap: 13.50 cm (Y=13.5cm). B1: (0.00, 2.26, 28.30) - B2: (0.00, 2.43, 28.58)
+  - [Environment/StairwellLanding/Stairs/Step_Tread_12 <=> Environment/StairwellLanding/Stairs/Step_Tread_11]
+    -> Gap: 13.50 cm (Y=13.5cm). B1: (0.00, 2.26, 28.30) - B2: (0.00, 2.08, 28.02)
+  - [Environment/StairwellLanding/Stairs/Step_Tread_4 <=> Environment/StairwellLanding/Stairs/Step_Tread_5]
+    -> Gap: 13.50 cm (Y=13.5cm). B1: (0.00, 0.86, 26.06) - B2: (0.00, 1.03, 26.34)
+  - [Environment/StairwellLanding/Stairs/Step_Tread_4 <=> Environment/StairwellLanding/Stairs/Step_Tread_3]
+    -> Gap: 13.50 cm (Y=13.5cm). B1: (0.00, 0.86, 26.06) - B2: (0.00, 0.68, 25.78)
+  - [Environment/StairwellLanding/Stairs/Step_Tread_1 <=> Environment/StairwellLanding/Stairs/Step_Tread_0]
+    -> Gap: 13.50 cm (Y=13.5cm). B1: (0.00, 0.33, 25.22) - B2: (0.00, 0.16, 24.94)
+  - [Environment/StairwellLanding/Stairs/Step_Tread_1 <=> Environment/StairwellLanding/Stairs/Step_Tread_2]
+    -> Gap: 13.50 cm (Y=13.5cm). B1: (0.00, 0.33, 25.22) - B2: (0.00, 0.51, 25.50)
+  - [Environment/StairwellLanding/Stairs/Step_Tread_1 <=> Environment/StairwellLanding/Stairs/Step_UnderSupport_1]
+    -> Gap: 13.50 cm (Y=13.5cm). B1: (0.00, 0.33, 25.22) - B2: (0.00, 0.09, 25.22)
+  - [Environment/Trim_Left <=> Environment/Elevator/Cabin_Floor]
+    -> Gap: 11.66 cm (X=6.0cm). B1: (-1.18, 0.06, 12.00) - B2: (0.00, -0.05, -1.30)
+  - [Environment/Trim_Left <=> Environment/Elevator/Cabin_LeftWall]
+    -> Gap: 10.00 cm (Z=10.0cm). B1: (-1.18, 0.06, 12.00) - B2: (-1.15, 1.40, -1.30)
+  - [Environment/Trim_Right <=> Environment/Elevator/Cabin_RightWall]
+    -> Gap: 10.00 cm (Z=10.0cm). B1: (1.18, 0.06, 12.00) - B2: (1.15, 1.40, -1.30)
+  - [Environment/Trim_Right <=> Environment/Elevator/Cabin_Floor]
+    -> Gap: 11.66 cm (X=6.0cm). B1: (1.18, 0.06, 12.00) - B2: (0.00, -0.05, -1.30)
+  - [Environment/Trim_Right <=> Environment/Room_214/Floor]
+    -> Gap: 5.00 cm (X=5.0cm). B1: (1.18, 0.06, 12.00) - B2: (3.35, -0.05, 10.00)
+  - [Environment/Trim_Right <=> Environment/Room_214/Wall_West_South]
+    -> Gap: 5.00 cm (X=5.0cm). B1: (1.18, 0.06, 12.00) - B2: (1.30, 1.40, 8.48)
+  - [Environment/StairwellLanding/Attic_Room/Floor_Structure/AtticFloor_LeftPath <=> Environment/StairwellLanding/Stairs/Step_Tread_14]
+    -> Gap: 6.10 cm (X=5.0cm). B1: (-1.95, 2.73, 27.85) - B2: (0.00, 2.61, 28.86)
+  ... and 65 more high-severity gaps.
+
+--------------------------------------------------------------------------------
+6. OVERLAPPING COPLANAR SURFACES (Z-FIGHTING RISK)
+--------------------------------------------------------------------------------
+Total Coplanar Overlapping Surface Pairs: 120 (11 large area >= 1.0 m²)
+
+Sample Coplanar Overlaps (Z-Fighting Risk):
+  - [Medium] Environment/StairwellLanding/Stairs/UnderStair_Bulkheads/Bulkhead_Right_11 <=> Environment/StairwellLanding/Stairs/Stringer_Right
+    -> Co-planar surfaces on Vertical X-plane (Area=0.54 m²). Shared plane coordinates near (0.66, 1.18, 27.53)
+  - [Medium] Environment/StairwellLanding/Attic_Room/Walls_Knee/KneeWall_East <=> Environment/StairwellLanding/Attic_Room/Gable_Walls/GableWall_North
+    -> Co-planar surfaces on Horizontal Y-plane (Area=0.00 m²). Shared plane coordinates near (1.60, 4.83, 29.78)
+  - [Medium] Environment/StairwellLanding/Attic_Room/Walls_Knee/KneeWall_East <=> Environment/StairwellLanding/Attic_Room/Gable_Walls/GableWall_South
+    -> Co-planar surfaces on Horizontal Y-plane (Area=0.00 m²). Shared plane coordinates near (1.60, 4.83, 25.93)
+  - [Medium] Environment/StairwellLanding/Lower_Walls/LowerWall_South_Right <=> Environment/StairwellLanding/Lower_Walls/LowerWall_East
+    -> Co-planar surfaces on Horizontal Y-plane (Area=0.00 m²). Shared plane coordinates near (3.75, 1.40, 26.88)
+  - [Medium] Environment/StairwellLanding/Lower_Walls/LowerWall_South_Right <=> Environment/Corridor_RightWall_Group/RightWall_Rear
+    -> Co-planar surfaces on Horizontal Y-plane (Area=0.01 m²). Shared plane coordinates near (1.98, 1.40, 22.63)
+  - [Medium] Environment/StairwellLanding/Lower_Walls/LowerWall_South_Right <=> Environment/Corridor_EndWall_Group/EndWall_Right
+    -> Co-planar surfaces on Horizontal Y-plane (Area=0.04 m²). Shared plane coordinates near (1.80, 1.40, 24.03)
+  - [Medium] Environment/StairwellLanding/Lower_Walls/LowerWall_South_Right <=> Environment/StairwellLanding/Attic_Room/Floor_Structure/AtticFloor_RightPath
+    -> Co-planar surfaces on Horizontal Y-plane (Area=0.15 m²). Shared plane coordinates near (2.33, 2.07, 25.93)
+  - [Medium] Environment/StairwellLanding/Stairs/UnderStair_Bulkheads/Bulkhead_Left_7 <=> Environment/StairwellLanding/Stairs/Stringer_Left
+    -> Co-planar surfaces on Vertical X-plane (Area=0.34 m²). Shared plane coordinates near (-0.66, 1.01, 26.97)
+  - [Medium] Environment/StairwellLanding/Stairs/Step_Plinth <=> Environment/StairwellLanding/Stairs/Step_Riser_0
+    -> Co-planar surfaces on Vertical Z-plane (Area=0.10 m²). Shared plane coordinates near (0.00, 0.06, 24.74)
+  - [Medium] Environment/Corridor_LeftWall_Group/LeftWall_Seg2 <=> Environment/Room_210/Wall_North
+    -> Co-planar surfaces on Horizontal Y-plane (Area=0.01 m²). Shared plane coordinates near (-2.38, 1.40, 9.10)
+  - [Medium] Environment/Corridor_LeftWall_Group/LeftWall_Seg2 <=> Environment/Room_212/Wall_South
+    -> Co-planar surfaces on Horizontal Y-plane (Area=0.01 m²). Shared plane coordinates near (-2.48, 1.40, 10.75)
+  - [Medium] Environment/StairwellLanding/Stairs/UnderStair_Bulkheads/Bulkhead_Right_2 <=> Environment/StairwellLanding/Stairs/Stringer_Right
+    -> Co-planar surfaces on Vertical X-plane (Area=0.10 m²). Shared plane coordinates near (0.66, 0.79, 26.27)
+  - [Medium] Environment/Elevator/ElevatorDoor_Right <=> Environment/Corridor_RightWall_Group/RightWall_Front
+    -> Co-planar surfaces on Horizontal Y-plane (Area=0.01 m²). Shared plane coordinates near (1.35, 1.28, 2.40)
+  - [Medium] Environment/StairwellLanding/Attic_Room/Chimney_Fireplace/Firebox_Back <=> Environment/StairwellLanding/Attic_Room/Chimney_Fireplace/Hearth_Lintel
+    -> Co-planar surfaces on Vertical Z-plane (Area=0.16 m²). Shared plane coordinates near (0.00, 3.60, 31.44)
+  - [Medium] Environment/StairwellLanding/Attic_Room/Chimney_Fireplace/Firebox_Back <=> Environment/StairwellLanding/Attic_Room/Chimney_Fireplace/Firebox_Ceiling
+    -> Co-planar surfaces on Vertical X-plane (Area=0.00 m²). Shared plane coordinates near (0.00, 3.60, 31.51)
+  - [Medium] Environment/StairwellLanding/Attic_Room/Chimney_Fireplace/Firebox_Back <=> Environment/StairwellLanding/Attic_Room/Chimney_Fireplace/Hearth_Base_Slab
+    -> Co-planar surfaces on Horizontal Y-plane (Area=0.06 m²). Shared plane coordinates near (0.00, 3.10, 31.40)
+  - [Medium] Environment/StairwellLanding/Stairs/UnderStair_Bulkheads/Bulkhead_Right_10 <=> Environment/StairwellLanding/Stairs/Stringer_Right
+    -> Co-planar surfaces on Vertical X-plane (Area=0.49 m²). Shared plane coordinates near (0.66, 1.14, 27.39)
+  - [Medium] Environment/Room_214/Wall_South <=> Environment/Room_214/Wall_Far
+    -> Co-planar surfaces on Horizontal Y-plane (Area=0.01 m²). Shared plane coordinates near (4.43, 1.40, 8.73)
+  - [Medium] Environment/Room_214/Wall_South <=> Environment/Corridor_RightWall_Group/RightWall_Front
+    -> Co-planar surfaces on Horizontal Y-plane (Area=0.01 m²). Shared plane coordinates near (2.30, 1.40, 6.10)
+  - [Medium] Environment/Door_216/Pivot/DoorSlab/RoomPlate_216 <=> Environment/Door_216/Pivot/DoorSlab
+    -> Co-planar surfaces on Vertical X-plane (Area=0.04 m²). Shared plane coordinates near (1.21, 1.52, 18.00)
+  ... and 100 more coplanar overlapping pairs.
+
+--------------------------------------------------------------------------------
+7. COLLIDER AUDIT (MISSING COLLIDERS & INEFFICIENT MESHCOLLIDERS)
+--------------------------------------------------------------------------------
+Structural Objects Missing Colliders: 49
+Static Meshes with MeshCollider: 6
+
+Missing Structural Colliders:
+  - [Critical] Environment/StairwellLanding/Stairs/Step_Riser_7 at (0.00, 1.31, 26.76)
+  - [Critical] Environment/StairwellLanding/Stairs/Step_Plinth at (0.00, 0.04, 24.68)
+  - [Critical] Environment/StairwellLanding/Stairs/Step_UnderSupport_5 at (0.00, 0.44, 26.34)
+  - [Critical] Environment/StairwellLanding/Stairs/Step_UnderSupport_4 at (0.00, 0.35, 26.06)
+  - [Critical] Environment/StairwellLanding/Stairs/Step_Tread_12 at (0.00, 2.26, 28.30)
+  - [Critical] Environment/StairwellLanding/Stairs/Step_Tread_4 at (0.00, 0.86, 26.06)
+  - [Critical] Environment/StairwellLanding/Stairs/Step_Tread_1 at (0.00, 0.33, 25.22)
+  - [Critical] Environment/StairwellLanding/Stairs/Step_Tread_14 at (0.00, 2.61, 28.86)
+  - [Critical] Environment/StairwellLanding/Stairs/Step_Tread_7 at (0.00, 1.38, 26.90)
+  - [Critical] Environment/StairwellLanding/Stairs/Step_Tread_15 at (0.00, 2.78, 29.14)
+  - [Critical] Environment/StairwellLanding/Stairs/Step_Riser_14 at (0.00, 2.54, 28.72)
+  - [Critical] Environment/StairwellLanding/Stairs/Step_Riser_12 at (0.00, 2.19, 28.16)
+  - [Critical] Environment/StairwellLanding/Stairs/Step_Riser_9 at (0.00, 1.66, 27.32)
+  - [Critical] Environment/StairwellLanding/Stairs/Step_Riser_2 at (0.00, 0.44, 25.36)
+  - [Critical] Environment/StairwellLanding/Stairs/Step_Tread_5 at (0.00, 1.03, 26.34)
+  - [Critical] Environment/StairwellLanding/Stairs/Step_UnderSupport_13 at (0.00, 1.14, 28.58)
+  - [Critical] Environment/StairwellLanding/Stairs/Step_Riser_6 at (0.00, 1.14, 26.48)
+  - [Critical] Environment/StairwellLanding/Stairs/Step_Tread_9 at (0.00, 1.73, 27.46)
+  - [Critical] Environment/StairwellLanding/Stairs/Step_UnderSupport_10 at (0.00, 0.88, 27.74)
+  - [Critical] Environment/StairwellLanding/Stairs/Step_UnderSupport_2 at (0.00, 0.18, 25.50)
+  - [Critical] Environment/StairwellLanding/Stairs/Step_Tread_6 at (0.00, 1.21, 26.62)
+  - [Critical] Environment/StairwellLanding/Stairs/Step_UnderSupport_15 at (0.00, 1.31, 29.14)
+  - [Critical] Environment/StairwellLanding/Stairs/Step_UnderSupport_12 at (0.00, 1.05, 28.30)
+  - [Critical] Environment/StairwellLanding/Stairs/Step_Riser_15 at (0.00, 2.71, 29.00)
+  - [Critical] Environment/StairwellLanding/Attic_Room/Set_Dressing/Stained_Floor_Rug at (1.90, 2.81, 29.80)
+  - [Critical] Environment/StairwellLanding/Stairs/Step_UnderSupport_3 at (0.00, 0.26, 25.78)
+  - [Critical] Environment/StairwellLanding/Stairs/Step_Tread_13 at (0.00, 2.43, 28.58)
+  - [Critical] Environment/StairwellLanding/Stairs/Step_Riser_1 at (0.00, 0.26, 25.08)
+  - [Critical] Environment/StairwellLanding/Stairs/Step_UnderSupport_8 at (0.00, 0.70, 27.18)
+  - [Critical] Environment/StairwellLanding/Stairs/Step_Riser_3 at (0.00, 0.61, 25.64)
+  - [Critical] Environment/StairwellLanding/Stairs/Step_Tread_11 at (0.00, 2.08, 28.02)
+  - [Critical] Environment/StairwellLanding/Stairs/Step_Riser_11 at (0.00, 2.01, 27.88)
+  - [Critical] Environment/StairwellLanding/Stairs/Step_Tread_10 at (0.00, 1.91, 27.74)
+  - [Critical] Environment/StairwellLanding/Stairs/Step_Tread_0 at (0.00, 0.16, 24.94)
+  - [Critical] Environment/StairwellLanding/Stairs/Step_Tread_3 at (0.00, 0.68, 25.78)
+  - [Critical] Environment/StairwellLanding/Stairs/Step_Riser_8 at (0.00, 1.49, 27.04)
+  - [Critical] Environment/StairwellLanding/Stairs/Step_UnderSupport_6 at (0.00, 0.53, 26.62)
+  - [Critical] Environment/StairwellLanding/Stairs/Step_Tread_2 at (0.00, 0.51, 25.50)
+  - [Critical] Environment/StairwellLanding/Stairs/Step_Riser_10 at (0.00, 1.84, 27.60)
+  - [Critical] Environment/StairwellLanding/Stairs/Step_UnderSupport_14 at (0.00, 1.23, 28.86)
+  - [Critical] Environment/StairwellLanding/Stairs/Step_UnderSupport_11 at (0.00, 0.96, 28.02)
+  - [Critical] Environment/StairwellLanding/Stairs/Step_Riser_5 at (0.00, 0.96, 26.20)
+  - [Critical] Environment/StairwellLanding/Stairs/Step_Riser_0 at (0.00, 0.09, 24.80)
+  - [Critical] Environment/StairwellLanding/Stairs/Step_Riser_13 at (0.00, 2.36, 28.44)
+  - [Critical] Environment/StairwellLanding/Stairs/Step_UnderSupport_7 at (0.00, 0.61, 26.90)
+  - [Critical] Environment/StairwellLanding/Stairs/Step_Riser_4 at (0.00, 0.79, 25.92)
+  - [Critical] Environment/StairwellLanding/Stairs/Step_Tread_8 at (0.00, 1.56, 27.18)
+  - [Critical] Environment/StairwellLanding/Stairs/Step_UnderSupport_1 at (0.00, 0.09, 25.22)
+  - [Critical] Environment/StairwellLanding/Stairs/Step_UnderSupport_9 at (0.00, 0.79, 27.46)
+
+================================================================================
+                         SEVERITY SUMMARY TABLE                                 
+================================================================================
+Total Issues Found: 546
+  - CRITICAL: 49
+  - HIGH:     101
+  - MEDIUM:   326
+  - LOW:      70
+
+| Severity | Category | Count | Primary Impact & Recommendation |
+|----------|----------|-------|---------------------------------|
+| Critical | Missing Structural Collider  | 49    | Player falls through world or walks through walls. Add BoxCollider. |
+| High     | Structural Seam / Gap        | 90    | Visible black seams/holes into the void. Snap objects or add trim. |
+| High     | Coplanar Z-Fighting          | 11    | Flickering textures on overlapping surfaces. Offset or merge slabs. |
+| Medium   | Off-Grid Position            | 209   | Misalignment across modular pieces. Snap positions to 0.05m grid. |
+| Medium   | Coplanar Z-Fighting          | 109   | Flickering textures on overlapping surfaces. Offset or merge slabs. |
+| Medium   | Structural Seam / Gap        | 8     | Visible black seams/holes into the void. Snap objects or add trim. |
+| Low      | Off-Grid Position            | 68    | Misalignment across modular pieces. Snap positions to 0.05m grid. |
+| Low      | Non-Unit Scale (Imported Mesh/Prefab) | 2     | Distorted UVs / normals. Bake transform or use unit scale prefab. |
+================================================================================
